@@ -11,7 +11,7 @@ struct ContentView: View {
             }
             
             Tab(value: 1) {
-                Text("Settings")
+                SettingsView()
             }
         }
         .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
@@ -20,6 +20,7 @@ struct ContentView: View {
                 .padding(.horizontal)
                 .offset(y: 18)
         }
+        .ignoresSafeArea(.keyboard)
         .sheet(isPresented: $isEarningsEntryShowing) {
             ScrollView {
                 Button {
@@ -40,4 +41,14 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+}
+
+struct SettingsView: View {
+    @State private var text = ""
+    
+    var body: some View {
+        TextField("Text field", text: $text)
+            .textFieldStyle(.roundedBorder)
+            .padding()
+    }
 }
