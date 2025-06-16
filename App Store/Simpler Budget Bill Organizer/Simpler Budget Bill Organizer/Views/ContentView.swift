@@ -19,9 +19,9 @@ struct ContentView: View {
         NavigationStack {
             if hasSeenOnboarding {
                 TabView(selection: $tabSelection) {
-                    Tab("Summary", systemImage: "dollarsign.gauge.chart.leftthird.topthird.rightthird", value: 1) {
-                        //
-                    }
+//                    Tab("Summary", systemImage: "dollarsign.gauge.chart.leftthird.topthird.rightthird", value: 1) {
+//                        //
+//                    }
                     
                     Tab("Expenses", systemImage: "creditcard", value: 2) {
                         //
@@ -31,9 +31,9 @@ struct ContentView: View {
                         BillsListView(controller: controller, isAddTransactionsShowing: $isAddTransactionsShowing, draftBill: $draftBill)
                     }
                     
-                    Tab("Settings", systemImage: "gear", value: 4) {
-                        //
-                    }
+//                    Tab("Settings", systemImage: "gear", value: 4) {
+//                        //
+//                    }
                 }
                 .onAppear {
                     sessionCount += 1
@@ -41,6 +41,7 @@ struct ContentView: View {
                         maybeRequestReview()
                     }
                 }
+                .whatsNewSheet()
             } else {
                 OnboardingView(hasSeenOnboarding: $hasSeenOnboarding)
             }
