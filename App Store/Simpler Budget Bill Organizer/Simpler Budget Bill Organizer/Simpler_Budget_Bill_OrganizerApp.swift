@@ -6,7 +6,7 @@ struct Simpler_Budget_Bill_OrganizerApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .modelContainer(for: [Transaction.self])
+                .modelContainer(for: [Transaction.self, Expense.self])
         }
     }
 }

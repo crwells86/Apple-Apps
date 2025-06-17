@@ -12,6 +12,7 @@ struct BillsListView: View {
     @Bindable var controller: FinanceController
     @Binding var isAddTransactionsShowing: Bool
     @Binding var draftBill: Transaction
+    @Binding var tabSelection: Int
     
     @Environment(\.modelContext) private var context
     @Query(filter: #Predicate<Transaction> { $0.isActive }) var bills: [Transaction]
@@ -104,12 +105,14 @@ struct BillsListView: View {
         }
         .navigationTitle("Cost of Living")
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    draftBill = Transaction()
-                    isAddTransactionsShowing.toggle()
-                } label: {
-                    Image(systemName: "plus.circle")
+            if tabSelection == 3 {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        draftBill = Transaction()
+                        isAddTransactionsShowing.toggle()
+                    } label: {
+                        Image(systemName: "plus.circle")
+                    }
                 }
             }
         }
@@ -127,6 +130,7 @@ struct BillsListView: View {
     BillsListView(
         controller: controller,
         isAddTransactionsShowing: $isAddTransactionsShowing,
-        draftBill: $draftBill
+        draftBill: $draftBill,
+        tabSelection: .constant(3)
     )
 }
