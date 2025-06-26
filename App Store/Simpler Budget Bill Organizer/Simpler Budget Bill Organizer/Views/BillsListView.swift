@@ -20,9 +20,16 @@ struct BillsListView: View {
     
     @State private var selectedSort: BillSortOption = .dueDate
     
+    @State private var isEditing = false
+    //    @Environment(\.editMode) private var editMode
+    
+    @State private var selectedBills = Set<UUID>() // Use UUID or the Transaction itself if Hashable
+    @State private var editMode: EditMode = .inactive
+    
     var body: some View {
         NavigationStack {
-            Form {
+            //            Form {
+            List(selection: $selectedBills) {
                 Section("Required income to cover bills") {
                     let chartData = BudgetCadence.allCases.map { cadence in
                         let decimalValue = budget.requiredIncome(for: bills, cadence: cadence)
@@ -35,40 +42,46 @@ struct BillsListView: View {
                     BillsBarChart(data: chartData)
                 }
                 
-                Picker("Sort by", selection: $selectedSort) {
-                    ForEach(BillSortOption.allCases, id: \.self) { option in
-                        Text(option.rawValue).tag(option)
+                Section {
+                    Picker("Sort by", selection: $selectedSort) {
+                        ForEach(BillSortOption.allCases, id: \.self) { option in
+                            Text(option.rawValue).tag(option)
+                        }
                     }
+                    .pickerStyle(.menu)
                 }
-                .pickerStyle(.menu)
                 
-                ForEach(sortedBills) { bill in
-                    BillRowView(bill: bill)
-                        .environment(budget)
-                        .swipeActions {
-                            Button(role: .destructive) {
-                                context.delete(bill)
-                                try? context.save()
-                            } label: {
-                                Label("Delete", systemImage: "trash")
+                Section {
+                    ForEach(sortedBills) { bill in
+                        BillRowView(bill: bill)
+                            .environment(budget)
+                            .swipeActions {
+                                Button(role: .destructive) {
+                                    context.delete(bill)
+                                    try? context.save()
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                                Button {
+                                    draftBill = bill
+                                    isAddTransactionsShowing.toggle()
+                                } label: {
+                                    Label("Edit", systemImage: "square.and.pencil")
+                                }
+                                .tint(.indigo)
                             }
-                            Button {
-                                draftBill = bill
-                                isAddTransactionsShowing.toggle()
-                            } label: {
-                                Label("Edit", systemImage: "square.and.pencil")
+                            .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                                Button {
+                                    bill.isPaid.toggle()
+                                    try? context.save()
+                                    
+                                    markBillAsPaid(bill)
+                                } label: {
+                                    Label("Paid", systemImage: "checkmark.circle")
+                                }
+                                .tint(.green)
                             }
-                            .tint(.indigo)
-                        }
-                        .swipeActions(edge: .leading, allowsFullSwipe: true) {
-                            Button {
-                                bill.isPaid.toggle()
-                                try? context.save()
-                            } label: {
-                                Label("Paid", systemImage: "checkmark.circle")
-                            }
-                            .tint(.green)
-                        }
+                    }
                 }
             }
             .sheet(isPresented: $isAddTransactionsShowing) {
@@ -82,10 +95,36 @@ struct BillsListView: View {
                     }
                 }
             }
-            .navigationTitle("Cost of Living")
+            .environment(\.editMode, $editMode)
             .toolbar {
                 if tabSelection == 3 {
-                    ToolbarItem(placement: .navigationBarTrailing) {
+                    ToolbarItemGroup(placement: .navigationBarTrailing) {
+                        Button {
+                            withAnimation {
+                                isEditing.toggle()
+                                editMode = isEditing ? .active : .inactive
+                                if !isEditing {
+                                    selectedBills.removeAll()
+                                }
+                            }
+                        } label: {
+                            Text(isEditing ? "Done" : "Edit")
+                        }
+                        
+                        if isEditing && !selectedBills.isEmpty {
+                            Button {
+                                markSelectedBillsPaid()
+                            } label: {
+                                Text("Mark Paid")
+                            }
+                            
+                            Button(role: .destructive) {
+                                deleteSelectedBills()
+                            } label: {
+                                Text("Delete Selected")
+                            }
+                        }
+                        
                         Button {
                             draftBill = Transaction()
                             isAddTransactionsShowing.toggle()
@@ -114,5 +153,40 @@ struct BillsListView: View {
         case .paidStatus:
             return bills.sorted { $0.isPaid && !$1.isPaid }
         }
+    }
+    
+    func markSelectedBillsPaid() {
+        for billID in selectedBills {
+            if let bill = bills.first(where: { $0.id == billID }) {
+                bill.isPaid = true
+                markBillAsPaid(bill)
+            }
+        }
+        try? context.save()
+        selectedBills.removeAll()
+    }
+    
+    private func markBillAsPaid(_ bill: Transaction) {
+            let expense = Expense(amount: Decimal(bill.amount), vendor: bill.name)
+        
+            context.insert(expense)
+
+            do {
+                try context.save()
+                // Optionally update BudgetController state if needed
+                // e.g., budget.updateTotals() or similar
+            } catch {
+                print("Failed to save expense: \(error)")
+            }
+        }
+    
+    func deleteSelectedBills() {
+        for billID in selectedBills {
+            if let bill = bills.first(where: { $0.id == billID }) {
+                context.delete(bill)
+            }
+        }
+        try? context.save()
+        selectedBills.removeAll()
     }
 }

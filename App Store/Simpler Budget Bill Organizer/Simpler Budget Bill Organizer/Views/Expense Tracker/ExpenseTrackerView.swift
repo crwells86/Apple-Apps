@@ -2,7 +2,6 @@ import SwiftUI
 import StoreKit
 import SwiftData
 import FinanceKit
-//import FinanceKitUI
 
 struct ExpenseTrackerView: View {
     @Environment(BudgetController.self) private var budget: BudgetController
@@ -89,6 +88,17 @@ struct ExpenseTrackerView: View {
     @State var transactions = [TransactionModel]()
     @State private var weeklySpending: Decimal = 0
     
+    @State private var deletedTransactionIDs: Set<String> = []
+
+    @AppStorage("deletedTransactionIDs") private var deletedTransactionIDsData: Data = Data()
+
+
+    
+    @State private var isSelecting = false
+    @State private var selectedExpenses: Set<Expense> = []
+    
+    @Binding var tabSelection: Int
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
@@ -119,8 +129,14 @@ struct ExpenseTrackerView: View {
                 // List of grouped expenses
                 GroupedExpensesListView(
                     groupedExpenses: groupedExpensesByMonth,
-                    onDelete: { context.delete($0) },
-                    onEdit: { editingExpense = $0 }
+                    onDelete: { expense in
+                        deletedTransactionIDs.insert(expense.id.uuidString)
+                        context.delete(expense)
+                        persistDeletedTransactionIDs()
+                    },
+                    onEdit: { editingExpense = $0 },
+                    isSelecting: isSelecting,
+                    selectedExpenses: $selectedExpenses
                 )
             }
             .padding(.top)
@@ -149,8 +165,36 @@ struct ExpenseTrackerView: View {
                 }
             }
         }
+        .toolbar {
+            if tabSelection == 2 {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    if isSelecting {
+                        Button("Delete") {
+                            deleteSelectedExpenses()
+                        }
+                        .disabled(selectedExpenses.isEmpty)
+                    } else {
+                        Button("Select") {
+                            isSelecting = true
+                        }
+                    }
+                }
+                
+                if isSelecting {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("Cancel") {
+                            isSelecting = false
+                            selectedExpenses.removeAll()
+                        }
+                    }
+                }
+            }
+        }
         .task {
-            if !subscriptionController.isSubscribed {
+            if subscriptionController.isSubscribed {
+                
+                deletedTransactionIDs = (try? JSONDecoder().decode(Set<String>.self, from: deletedTransactionIDsData)) ?? []
+                
                 do {
                     let status = try await FinanceStore.shared.requestAuthorization()
                     
@@ -164,6 +208,30 @@ struct ExpenseTrackerView: View {
             }
         }
     }
+    
+    private func persistDeletedTransactionIDs() {
+        deletedTransactionIDsData = (try? JSONEncoder().encode(deletedTransactionIDs)) ?? Data()
+    }
+    
+    private func deleteSelectedExpenses() {
+        withAnimation {
+            for expense in selectedExpenses {
+                deletedTransactionIDs.insert(expense.id.uuidString)
+                context.delete(expense)
+            }
+            persistDeletedTransactionIDs()
+
+            do {
+                try context.save()
+            } catch {
+                print("Error saving context: \(error)")
+            }
+
+            selectedExpenses.removeAll()
+            isSelecting = false
+        }
+    }
+
     
     // add FinanceKit functions here
     func updateFinanceKitData() async {
@@ -198,18 +266,43 @@ struct ExpenseTrackerView: View {
         }
     }
     
+//    func importFinanceKitTransactionsAsExpenses(_ transactions: [TransactionModel]) {
+//        let ignoredDescriptions: Set<String> = ["Point Of Sale", "Deposit"]
+//        
+//        for transaction in transactions {
+//            guard !ignoredDescriptions.contains(transaction.description) else { continue }
+//            
+//            let alreadyExists = allExpenses.contains { $0.id == transaction.id }
+//            guard !alreadyExists else { continue }
+//            
+//            let vendor = transaction.description
+//            let inferredCategory = inferCategory(from: vendor)
+//            
+//            let newExpense = Expense(
+//                amount: abs(transaction.amount),
+//                vendor: vendor,
+//                date: transaction.date,
+//                category: inferredCategory
+//            )
+//            newExpense.id = transaction.id
+//            context.insert(newExpense)
+//        }
+//    }
+    
     func importFinanceKitTransactionsAsExpenses(_ transactions: [TransactionModel]) {
-        let ignoredDescriptions: Set<String> = ["Point Of Sale", "Deposit", "Interest"]
+        let ignoredDescriptions: Set<String> = ["Point Of Sale", "Deposit"]
         
         for transaction in transactions {
             guard !ignoredDescriptions.contains(transaction.description) else { continue }
-            
+
+            guard !deletedTransactionIDs.contains(transaction.id.uuidString) else { continue }
+
             let alreadyExists = allExpenses.contains { $0.id == transaction.id }
             guard !alreadyExists else { continue }
-            
+
             let vendor = transaction.description
             let inferredCategory = inferCategory(from: vendor)
-            
+
             let newExpense = Expense(
                 amount: abs(transaction.amount),
                 vendor: vendor,
@@ -220,6 +313,7 @@ struct ExpenseTrackerView: View {
             context.insert(newExpense)
         }
     }
+
     
     func inferCategory(from description: String) -> ExpenseCategory {
         let lowercaseDescription = description.lowercased()

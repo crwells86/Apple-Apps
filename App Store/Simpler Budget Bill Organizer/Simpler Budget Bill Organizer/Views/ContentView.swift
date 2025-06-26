@@ -44,7 +44,7 @@ struct ContentView: View {
             if hasSeenOnboarding {
                 TabView(selection: $tabSelection) {
                     Tab("Summary", systemImage: "dollarsign.gauge.chart.leftthird.topthird.rightthird", value: 1) {
-                        if !subscriptionController.isSubscribed {
+                        if subscriptionController.isSubscribed {
                             SummaryTabView()
                                 .environment(budget)
                                 .environment(subscriptionController)
@@ -54,7 +54,7 @@ struct ContentView: View {
                     }
                     
                     Tab("Expenses", systemImage: "creditcard", value: 2) {
-                        ExpenseTrackerView()
+                        ExpenseTrackerView(tabSelection: $tabSelection)
                             .environment(budget)
                     }
                     
@@ -68,14 +68,14 @@ struct ContentView: View {
                     }
                     
                     Tab("Income", systemImage: "dollarsign.circle", value: 5) {
-                        if !subscriptionController.isSubscribed {
+                        if subscriptionController.isSubscribed {
                             IncomeTabView()
                         } else {
                             PaywallView()
                         }
                     }
                 }
-                .navigationTitle(tabSelection == 1 && !subscriptionController.isSubscribed ? "\(Date().formatted(.dateTime.month(.wide))) overview" : "")
+                .navigationTitle(tabSelection == 1 && subscriptionController.isSubscribed ? "\(Date().formatted(.dateTime.month(.wide))) overview" : "")
                 .onAppear {
                     tabSelection = subscriptionController.isSubscribed ? 1: 2
                     sessionCount += 1
