@@ -1,38 +1,68 @@
-enum BillFrequency: String, CaseIterable, Identifiable {
+import Foundation
+
+/// The recurrence options for your bills.
+enum BillFrequency: String, CaseIterable, Codable {
+    /// A one-off payment (no recurrence).
     case oneTime
+    /// Every day.
+    case daily
+    /// Every week.
     case weekly
-    case everyOtherWeek
+    /// Every two weeks.
+    case biweekly
+    /// Twice per month (e.g. on the 1st & 15th).
+    case semiMonthly
+    /// Every month.
     case monthly
-    case everyOtherMonth
+    /// Every two months.
+    case biMonthly
+    /// Every three months.
+    case quarterly
+    /// Every six months.
+    case semiAnnual
+    /// Every year.
     case yearly
     
-    var id: String { rawValue }
-    
-    var toMonthly: Double {
+    /// The `DateComponents` step to add for each recurrence.
+    var dateComponents: DateComponents {
         switch self {
-        case .monthly:
-            return 1
-        case .weekly:
-            return 52.0 / 12.0
-        case .everyOtherWeek:
-            return 26.0 / 12.0
-        case .everyOtherMonth:
-            return 0.5
-        case .yearly:
-            return 1.0 / 12.0
         case .oneTime:
-            return 0
+            return DateComponents()
+        case .daily:
+            return DateComponents(day: 1)
+        case .weekly:
+            return DateComponents(day: 7)
+        case .biweekly:
+            return DateComponents(day: 14)
+        case .semiMonthly:
+            // “twice a month” – often treated as 1st & 15th
+            return DateComponents(day: 15)
+        case .monthly:
+            return DateComponents(month: 1)
+        case .biMonthly:
+            return DateComponents(month: 2)
+        case .quarterly:
+            return DateComponents(month: 3)
+        case .semiAnnual:
+            return DateComponents(month: 6)
+        case .yearly:
+            return DateComponents(year: 1)
         }
     }
     
-    var label: String {
+    /// A human-readable name for UI.
+    var displayName: String {
         switch self {
-        case .oneTime: return "One Time"
-        case .weekly: return "Weekly"
-        case .everyOtherWeek: return "Every Other Week"
-        case .monthly: return "Monthly"
-        case .everyOtherMonth: return "Every Other Month"
-        case .yearly: return "Yearly"
+        case .oneTime:       return "One-Time"
+        case .daily:         return "Daily"
+        case .weekly:        return "Weekly"
+        case .biweekly:      return "Bi-Weekly"
+        case .semiMonthly:   return "Semi-Monthly"
+        case .monthly:       return "Monthly"
+        case .biMonthly:     return "Bi-Monthly"
+        case .quarterly:     return "Quarterly"
+        case .semiAnnual:    return "Semi-Annual"
+        case .yearly:        return "Yearly"
         }
     }
 }

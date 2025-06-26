@@ -1,4 +1,5 @@
 import SwiftUI
+import UserNotifications
 
 struct TransactionFormView: View {
     @Binding var bill: Transaction
@@ -13,8 +14,9 @@ struct TransactionFormView: View {
                 TextField("Amount", value: $bill.amount, format: .currency(code: bill.currencyCode))
                     .keyboardType(.decimalPad)
                 
+                // Category Picker
                 Picker("Category", selection: $bill.category) {
-                    ForEach(ExpenseCategory.allCases) { category in
+                    ForEach(ExpenseCategory.allCases, id: \.self) { category in
                         HStack {
                             category.icon
                             Text(category.label)
@@ -24,9 +26,10 @@ struct TransactionFormView: View {
                 }
                 .pickerStyle(.menu)
                 
+                // Frequency Picker
                 Picker("Frequency", selection: $bill.frequency) {
-                    ForEach(BillFrequency.allCases) { freq in
-                        Text(freq.label).tag(freq)
+                    ForEach(BillFrequency.allCases, id: \.self) { freq in
+                        Text(freq.displayName).tag(freq)
                     }
                 }
                 .pickerStyle(.menu)
@@ -37,47 +40,33 @@ struct TransactionFormView: View {
                 
                 if bill.remindMe {
                     Picker("Day of Month", selection: $bill.remindDay) {
-                        ForEach(1..<32) { day in
-                            Text("\(day)").tag(day as Int?)
+                        ForEach(1..<32, id: \.self) { day in
+                            Text("\(day)").tag(Optional(day))
                         }
                     }
                     .onChange(of: bill.remindDay) {
                         updateDueDate()
                     }
                     
-                    DatePicker("Time of Day", selection: Binding<Date>(
-                        get: {
-                            let components = DateComponents(hour: bill.remindHour ?? 9, minute: bill.remindMinute ?? 0)
-                            return Calendar.current.date(from: components) ?? Date()
-                        },
-                        set: { newDate in
-                            let components = Calendar.current.dateComponents([.hour, .minute], from: newDate)
-                            let now = Date()
-                            let calendar = Calendar.current
-                            
-                            bill.remindHour = components.hour
-                            bill.remindMinute = components.minute
-                            
-                            var dateComps = DateComponents()
-                            dateComps.day = bill.remindDay ?? 1
-                            dateComps.month = calendar.component(.month, from: now)
-                            dateComps.year = calendar.component(.year, from: now)
-                            dateComps.hour = components.hour
-                            dateComps.minute = components.minute
-                            
-                            guard let proposedDate = calendar.date(from: dateComps) else { return }
-                            
-                            if proposedDate < now {
-                                if let nextMonthDate = calendar.date(byAdding: .month, value: 1, to: proposedDate) {
-                                    bill.dueDate = nextMonthDate
-                                } else {
-                                    bill.dueDate = proposedDate
-                                }
-                            } else {
-                                bill.dueDate = proposedDate
+                    DatePicker(
+                        "Time of Day",
+                        selection: Binding<Date>(
+                            get: {
+                                let comps = DateComponents(
+                                    hour: bill.remindHour ?? 9,
+                                    minute: bill.remindMinute ?? 0
+                                )
+                                return Calendar.current.date(from: comps) ?? Date()
+                            },
+                            set: { newDate in
+                                let comps = Calendar.current.dateComponents([.hour, .minute], from: newDate)
+                                bill.remindHour = comps.hour
+                                bill.remindMinute = comps.minute
+                                updateDueDate()
                             }
-                        }
-                    ), displayedComponents: .hourAndMinute)
+                        ),
+                        displayedComponents: .hourAndMinute
+                    )
                 }
             }
         }
@@ -96,60 +85,75 @@ struct TransactionFormView: View {
         }
     }
     
-    func updateDueDate() {
+    private func updateDueDate() {
         let calendar = Calendar.current
         let now = Date()
+        let components = DateComponents(
+            year: calendar.component(.year, from: now),
+            month: calendar.component(.month, from: now),
+            day: bill.remindDay ?? 1,
+            hour: bill.remindHour ?? 9,
+            minute: bill.remindMinute ?? 0
+        )
         
-        var dateComps = DateComponents()
-        dateComps.day = bill.remindDay ?? 1
-        dateComps.month = calendar.component(.month, from: now)
-        dateComps.year = calendar.component(.year, from: now)
-        dateComps.hour = bill.remindHour ?? 9
-        dateComps.minute = bill.remindMinute ?? 0
+        guard let proposed = calendar.date(from: components) else { return }
         
-        guard let proposedDate = calendar.date(from: dateComps) else { return }
-        
-        if proposedDate < now {
-            if let nextMonthDate = calendar.date(byAdding: .month, value: 1, to: proposedDate) {
-                bill.dueDate = nextMonthDate
-            } else {
-                bill.dueDate = proposedDate
-            }
-        } else {
-            bill.dueDate = proposedDate
+        if proposed >= now {
+            bill.dueDate = proposed
+            return
         }
+        
+        // Use frequency's dateComponents to calculate next due date
+        let step = bill.frequency.dateComponents
+        
+        // If step is empty (oneTime), just use proposed
+        if step == DateComponents() {
+            bill.dueDate = proposed
+            return
+        }
+        
+        // Add recurrence interval until the new due date is in the future
+        var nextDueDate = proposed
+        while nextDueDate < now {
+            if let newDate = calendar.date(byAdding: step, to: nextDueDate) {
+                nextDueDate = newDate
+            } else {
+                break // fallback, to avoid infinite loop
+            }
+        }
+        
+        bill.dueDate = nextDueDate
     }
+
     
-    func scheduleNotification(for bill: Transaction) {
-        guard let day = bill.remindDay,
-              let hour = bill.remindHour,
-              let minute = bill.remindMinute else { return }
+    private func scheduleNotification(for bill: Transaction) {
+        guard
+            let day    = bill.remindDay,
+            let hour   = bill.remindHour,
+            let minute = bill.remindMinute
+        else { return }
         
         let content = UNMutableNotificationContent()
         content.title = bill.name
-        content.body = "Reminder: \(bill.name) is due today."
+        content.body  = "Reminder: \(bill.name) is due today."
         content.sound = .default
         
-        var dateComponents = DateComponents()
-        dateComponents.hour = hour
-        dateComponents.minute = minute
-        
+        var comps = DateComponents(hour: hour, minute: minute)
         switch bill.frequency {
         case .monthly:
-            dateComponents.day = day
+            comps.day = day
         case .weekly:
-            dateComponents.weekday = day
+            comps.weekday = day
         default:
             return
         }
         
-        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-        let request = UNNotificationRequest(
+        let trigger  = UNCalendarNotificationTrigger(dateMatching: comps, repeats: true)
+        let request  = UNNotificationRequest(
             identifier: bill.id.uuidString,
-            content: content,
-            trigger: trigger
+            content:    content,
+            trigger:    trigger
         )
-        
         UNUserNotificationCenter.current().add(request)
     }
 }
@@ -175,9 +179,9 @@ struct TransactionFormView: View {
         remindMinute: 0
     )
     
-    TransactionFormView(bill: $bill)  {
-        // onSave logic here
-    } onCancel: {
-        // onCancel logic here
-    }
+    TransactionFormView(
+        bill: $bill,
+        onSave:  {},
+        onCancel: {}
+    )
 }

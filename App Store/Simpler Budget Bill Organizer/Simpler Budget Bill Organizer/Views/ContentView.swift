@@ -3,17 +3,20 @@ import StoreKit
 import SwiftData
 
 struct ContentView: View {
+    @Environment(\.modelContext) private var context
+    @Environment(SubscriptionController.self) var subscriptionController
+    @Query private var bills: [Transaction]
+    
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @AppStorage("sessionCount") private var sessionCount = 0
     @AppStorage("hasRequestedReview") private var hasRequestedReview = false
+    @AppStorage("hasSeenReviewPrompt") private var hasSeenReviewPrompt = false
     
-    @State private var controller = FinanceController()
+    @State private var budget = BudgetController()
     @State private var isAddTransactionsShowing = false
     @State private var draftBill = Transaction()
     @State private var tabSelection = 1
-    
-    @Environment(\.modelContext) private var context
-    @Query private var bills: [Transaction]
+    @State private var showingPaywall = false
     
     init() {
         // Navigation Bar appearance
@@ -41,28 +44,46 @@ struct ContentView: View {
             if hasSeenOnboarding {
                 TabView(selection: $tabSelection) {
                     Tab("Summary", systemImage: "dollarsign.gauge.chart.leftthird.topthird.rightthird", value: 1) {
-                        SummaryTabView()
+                        if !subscriptionController.isSubscribed {
+                            SummaryTabView()
+                                .environment(budget)
+                                .environment(subscriptionController)
+                        } else {
+                            PaywallView()
+                        }
                     }
                     
                     Tab("Expenses", systemImage: "creditcard", value: 2) {
-                        ExpenseTrackerView(tabSelection: $tabSelection)
+                        ExpenseTrackerView()
+                            .environment(budget)
                     }
                     
                     Tab("Bills", systemImage: "calendar.badge.clock", value: 3) {
-                        BillsListView(controller: controller, isAddTransactionsShowing: $isAddTransactionsShowing, draftBill: $draftBill, tabSelection: $tabSelection)
+                        BillsListView(
+                            isAddTransactionsShowing: $isAddTransactionsShowing,
+                            draftBill: $draftBill,
+                            tabSelection: $tabSelection
+                        )
+                        .environment(budget)
                     }
                     
-                    //                    Tab("Settings", systemImage: "gear", value: 4) {
-                    //                        //
-                    //                    }
+                    Tab("Income", systemImage: "dollarsign.circle", value: 5) {
+                        if !subscriptionController.isSubscribed {
+                            IncomeTabView()
+                        } else {
+                            PaywallView()
+                        }
+                    }
                 }
+                .navigationTitle(tabSelection == 1 && !subscriptionController.isSubscribed ? "\(Date().formatted(.dateTime.month(.wide))) overview" : "")
                 .onAppear {
+                    tabSelection = subscriptionController.isSubscribed ? 1: 2
                     sessionCount += 1
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                         maybeRequestReview()
                     }
                 }
-                .whatsNewSheet()
+                //                .whatsNewSheet()
             } else {
                 OnboardingView(hasSeenOnboarding: $hasSeenOnboarding)
             }
@@ -70,7 +91,7 @@ struct ContentView: View {
     }
     
     private func maybeRequestReview() {
-        guard sessionCount >= 14, !hasRequestedReview else { return }
+        guard sessionCount >= 7, !hasRequestedReview else { return }
         
         if let scene = UIApplication.shared.connectedScenes
             .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {

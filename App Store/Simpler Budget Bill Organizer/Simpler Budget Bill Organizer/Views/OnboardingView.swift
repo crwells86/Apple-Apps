@@ -4,44 +4,58 @@ struct OnboardingView: View {
     @Binding var hasSeenOnboarding: Bool
     
     var body: some View {
-        TabView {
-            OnboardingPage(image: "chart.line.uptrend.xyaxis", title: "Know What You Need", description: "Add your bills once and instantly see how much you need to earn annually, monthly, weekly, or hourly.")
-            
-            OnboardingPage(image: "bell.badge", title: "Never Miss a Due Date", description: "Set reminders to stay on top of your expenses. Peace of mind, built-in.")
-            
-            OnboardingPage(image: "lock.shield", title: "Private. Personal. Precise.", description: "No bank links. No ads. Just your bills and total control.")
-            
-            VStack(spacing: 24) {
-                Image(systemName: "checkmark.circle")
-                    .font(.system(size: 60))
-                    .foregroundColor(.green)
-                Text("Ready to Budget Smarter?")
-                    .font(.title)
-                    .bold()
+        VStack {
+            TabView {
+                // 1: Auto‐budget from bills
+                OnboardingPage(
+                    image: "list.bullet.rectangle.portrait",
+                    title: "Auto-Budget in Seconds",
+                    description: "Enter your recurring bills once and watch as we calculate exactly what you need to earn—hourly, daily, weekly, monthly, or yearly."
+                )
                 
-                Button {
-                    hasSeenOnboarding.toggle()
-                } label: {
-                    Text("Get Started")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .cornerRadius(12)
-                }
-                .padding(.horizontal)
+                // 2: Track spending live
+                OnboardingPage(
+                    image: "chart.bar.doc.horizontal",
+                    title: "Live Expense Tracking",
+                    description: "Log your expenses on the go and see in real time how much you’ve spent vs. how much you have left for your chosen period."
+                )
+                
+                // 3: Set reminders & alerts
+                OnboardingPage(
+                    image: "bell.and.waves.left.and.right",
+                    title: "Never Miss a Payment",
+                    description: "Schedule reminders for due dates and get notified so late fees become a thing of the past."
+                )
+                
+                // 4: Privacy-first, no ads
+                OnboardingPage(
+                    image: "hand.raised.slash",
+                    title: "Private & Ad-Free",
+                    description: "All your data stays on your device. No bank links, no ads—just you in control of your budget."
+                )
             }
-            .padding()
+            .tabViewStyle(.page)
+            
+            Button(action: {
+                hasSeenOnboarding = true
+            }) {
+                Text("Get Started")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.accentColor)
+                    .foregroundColor(.white)
+                    .cornerRadius(12)
+            }
+            .padding(.horizontal)
         }
-        .tabViewStyle(.page)
         .onAppear {
-            UIPageControl.appearance().currentPageIndicatorTintColor = UIColor(Color.green)
-            UIPageControl.appearance().pageIndicatorTintColor = UIColor(Color.green.opacity(0.3))
+            UIPageControl.appearance().currentPageIndicatorTintColor = UIColor(Color.accentColor)
+            UIPageControl.appearance().pageIndicatorTintColor = UIColor(Color.accentColor.opacity(0.3))
         }
     }
 }
 
 #Preview {
-    OnboardingView(hasSeenOnboarding: .constant(true))
+    OnboardingView(hasSeenOnboarding: .constant(false))
 }

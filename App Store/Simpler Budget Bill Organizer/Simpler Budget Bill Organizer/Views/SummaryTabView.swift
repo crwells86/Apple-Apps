@@ -1,223 +1,676 @@
 import SwiftUI
 import SwiftData
-
-
-import Charts
+import FinanceKit
 
 struct SummaryTabView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Expense.date, order: .reverse) var expenses: [Expense]
-    @Query(sort: \Transaction.dueDate) var transactions: [Transaction]
+    @Environment(BudgetController.self) private var budget: BudgetController
+    @Query(sort: \Transaction.dueDate) private var bills: [Transaction]
+    @Query private var incomes: [Income]
+    @Query private var expenses: [Expense]
+    
+    var paidBills: [Transaction] {
+        bills.filter { $0.isPaid }
+    }
+    
+    var paidBillsAsExpenses: [Expense] {
+        paidBills.map { bill in
+            Expense(amount: Decimal(bill.amount), vendor: bill.vendor, date: bill.dueDate ?? Date())
+        }
+    }
+    
+    // MARK: - Date boundaries for current month
+    private let calendar = Calendar.current
+    private let now = Date()
+    private var thisMonthStart: Date {
+        calendar.date(from: calendar.dateComponents([.year, .month], from: now))!
+    }
+    private var nextMonthStart: Date {
+        calendar.date(byAdding: .month, value: 1, to: thisMonthStart)!
+    }
+    
+    // MARK: - Filtered data for current month
+    private var incomesThisMonth: [Income] {
+        incomes.filter { income in
+            //                guard  else { return false }
+            let date = income.date
+            return date >= thisMonthStart && date < nextMonthStart
+        }
+    }
+    
+    private var expensesThisMonth: [Expense] {
+        expenses.filter { expense in
+            expense.date >= thisMonthStart && expense.date < nextMonthStart
+        }
+    }
+    
+    private var paidBillsThisMonth: [Transaction] {
+        paidBills.filter { bill in
+            guard let dueDate = bill.dueDate else { return false }
+            return dueDate >= thisMonthStart && dueDate < nextMonthStart
+        }
+    }
+    
+    private var paidBillsAsExpensesThisMonth: [Expense] {
+        paidBillsThisMonth.map { bill in
+            Expense(amount: Decimal(bill.amount), vendor: bill.vendor, date: bill.dueDate ?? Date())
+        }
+    }
     
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 32) {
-                    SectionHeader(icon: "chart.bar.fill", title: "Spending by Vendor", accent: .green)
+                    //                    AppleCardAccountView()
                     
-                    ChartView(data: vendorTotals)
-                        .frame(height: 220)
-                        .padding(.horizontal, 4)
+                    // MARK: - Budget Summary
+                    SectionHeader(title: "Budget Summary", systemImage: "wallet.pass")
                     
-                    SectionHeader(icon: "creditcard.fill", title: "Total Spent This Month", accent: .purple)
-                    
-                    Text(totalThisMonth.formatted(.currency(code: "USD")))
-                        .font(.largeTitle.bold())
-                        .foregroundStyle(LinearGradient(
-                            colors: [.purple, .blue],
-                            startPoint: .leading,
-                            endPoint: .trailing))
-                        .padding(.horizontal, 4)
-                    
-                    SectionHeader(icon: "calendar.circle.fill", title: "Upcoming Bills", accent: .pink)
-                    
-                    ForEach(upcomingTransactions.prefix(3)) { tx in
-                        BillCard(transaction: tx)
-                            .padding(.horizontal, 4)
+                    HStack(spacing: 16) {
+                        ValueCard(
+                            title: "Left to Spend",
+                            value: budget.remainingBudget(
+                                bills: bills,
+                                expenses: expenses + paidBillsAsExpenses,
+                                incomes: incomes,
+                                for: .monthly
+                            ).formatted(.currency(code: "USD"))
+                        )
+                        
+                        InfoTile(
+                            title: "Planned Budget",
+                            value: budget.totalBills(bills, for: .monthly).formatted(.currency(code: "USD"))
+                        )
                     }
+                    .padding(.horizontal)
                     
-                    SectionHeader(icon: "clock.fill", title: "Recent Expenses", accent: .blue)
-                    ForEach(expenses.prefix(5)) { expense in
-                        ExpenseRow(expense: expense)
-                            .padding(.horizontal, 4)
+                    // MARK: - Income vs. Spending
+                    SectionHeader(title: "Income vs. Spending", systemImage: "chart.xyaxis.line")
+                    
+                    CashFlowSectionView(
+                        income: budget.totalIncome(incomesThisMonth),
+                        expense: budget.totalExpenses(expenses: expensesThisMonth, paidBills: paidBillsThisMonth),
+                        incomeChartData: budget.chartData(for: incomesThisMonth),
+                        expenseChartData: budget.chartData(for: expensesThisMonth + paidBillsAsExpensesThisMonth)
+                    )
+                    
+                    // MARK: - Spending by Category
+                    SectionHeader(title: "Where Your Money Goes", systemImage: "list.bullet.rectangle")
+                    
+                    SpendingSectionView(expenses: expenses)
+                    
+                    // MARK: - Quick Stats
+                    SectionHeader(title: "Quick Stats", systemImage: "sparkle.magnifyingglass")
+                    
+                    VStack(spacing: 16) {
+                        HStack(spacing: 16) {
+                            HighlightBox(
+                                title: "Upcoming Bills",
+                                value: "\(budget.upcomingPayments(bills: bills).count)"
+                            )
+                            
+                            KPIView(
+                                title: "Paid Bills",
+                                value: "\(paidBills.count)"
+                            )
+                        }
+                        
+                        HStack(spacing: 16) {
+                            ValueCard(
+                                title: "Needed Monthly Income",
+                                value: budget.requiredIncome(for: bills, cadence: .monthly).formatted(.currency(code: "USD"))
+                            )
+                            
+                            DataPanel(
+                                title: "Spent This Month",
+                                value: "\(Int(budget.spendingProgress(bills: bills, expenses: expenses, incomes: incomes, for: .monthly) * 100))%"
+                            )
+                        }
                     }
+                    .padding(.horizontal)
+                    
+                    // MARK: - Export
+                    HStack {
+                        Spacer()
+                        Button(action: exportPDF) {
+                            Label("Export as PDF", systemImage: "square.and.arrow.up")
+                                .font(.headline)
+                                .padding()
+                                .background(Color.accentColor.opacity(0.1))
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                        }
+                        Spacer()
+                    }
+                    .padding(.top)
                 }
-                .padding(.vertical, 20)
-                .padding(.horizontal)
+                .padding(.vertical)
             }
-            .background(.ultraThinMaterial)
         }
     }
     
-    var upcomingTransactions: [Transaction] {
-        transactions.filter { tx in
-            tx.isActive &&
-            !tx.isPaid &&
-            tx.dueDate.map { due in
-                let now = Date()
-                return due >= now && due <= Calendar.current.date(byAdding: .day, value: 30, to: now)!
-            } ?? false
+    private func exportPDF() {
+        let pageSize = CGSize(width: 612, height: 792) // US Letter
+        let format = UIGraphicsPDFRendererFormat()
+        let renderer = UIGraphicsPDFRenderer(bounds: CGRect(origin: .zero, size: pageSize), format: format)
+        
+        let data = renderer.pdfData { context in
+            context.beginPage()
+            var yOffset: CGFloat = 40
+            
+            func drawText(_ text: String, font: UIFont = .systemFont(ofSize: 14), yOffset: inout CGFloat, spacing: CGFloat = 8, bold: Bool = false) {
+                let paragraphStyle = NSMutableParagraphStyle()
+                paragraphStyle.lineBreakMode = .byWordWrapping
+                
+                let attributes: [NSAttributedString.Key: Any] = [
+                    .font: bold ? UIFont.boldSystemFont(ofSize: font.pointSize) : font,
+                    .paragraphStyle: paragraphStyle
+                ]
+                
+                let attributedString = NSAttributedString(string: text, attributes: attributes)
+                let rect = CGRect(x: 40, y: yOffset, width: pageSize.width - 80, height: .greatestFiniteMagnitude)
+                let size = attributedString.boundingRect(with: rect.size, options: [.usesLineFragmentOrigin], context: nil)
+                
+                attributedString.draw(in: CGRect(origin: CGPoint(x: 40, y: yOffset), size: size.size))
+                yOffset += size.height + spacing
+            }
+            
+            // MARK: — Summary Header
+            drawText("📄 Monthly Budget Summary", font: .boldSystemFont(ofSize: 20), yOffset: &yOffset, spacing: 20)
+            
+            drawText("Total Income: \(budget.totalIncome(incomes).formatted(.currency(code: "USD")))", yOffset: &yOffset)
+            drawText("Total Expenses: \(budget.totalExpenses(expenses: expenses, paidBills: paidBills).formatted(.currency(code: "USD")))", yOffset: &yOffset)
+            drawText("Remaining: \(budget.remainingBudget(bills: bills, expenses: expenses + paidBillsAsExpenses, incomes: incomes, for: .monthly).formatted(.currency(code: "USD")))", yOffset: &yOffset)
+            drawText("Upcoming Bills: \(budget.upcomingPayments(bills: bills).count)", yOffset: &yOffset)
+            drawText("Paid Bills: \(paidBills.count)", yOffset: &yOffset)
+            drawText("Spent %: \(Int(budget.spendingProgress(bills: bills, expenses: expenses, incomes: incomes, for: .monthly) * 100))%", yOffset: &yOffset, spacing: 20)
+            
+            // MARK: — Income
+            drawText("💰 Income", font: .boldSystemFont(ofSize: 16), yOffset: &yOffset)
+            for income in incomes {
+                drawText("- \(income.date.formatted(date: .abbreviated, time: .omitted)) | \(income.amount.formatted(.currency(code: "USD")))", yOffset: &yOffset)
+            }
+            
+            // MARK: — Expenses
+            drawText("💸 Expenses", font: .boldSystemFont(ofSize: 16), yOffset: &yOffset, spacing: 12)
+            for expense in expenses {
+                drawText("- \(expense.date.formatted(date: .abbreviated, time: .omitted)) | \(expense.vendor) | \(expense.amount.formatted(.currency(code: "USD")))", yOffset: &yOffset)
+            }
+            
+            // MARK: — Paid Bills
+            drawText("📬 Paid Bills", font: .boldSystemFont(ofSize: 16), yOffset: &yOffset, spacing: 12)
+            for bill in paidBills {
+                guard let due = bill.dueDate else { continue }
+                drawText("- \(due.formatted(date: .abbreviated, time: .omitted)) | \(bill.name) | \(Decimal(bill.amount).formatted(.currency(code: bill.currencyCode)))", yOffset: &yOffset)
+            }
+        }
+        
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("BudgetSummary.pdf")
+        do {
+            try data.write(to: url)
+            sharePDF(at: url)
+        } catch {
+            print("Failed to save PDF:", error.localizedDescription)
         }
     }
     
-    var vendorTotals: [(String, Decimal)] {
-        let grouped = Dictionary(grouping: expenses) { $0.vendor }
-        return grouped.mapValues { $0.reduce(0) { $0 + $1.amount } }
-            .map { ($0.key, $0.value) }
-            .sorted { $0.1 > $1.1 }
-    }
     
-    var totalThisMonth: Decimal {
-        let startOfMonth = Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: Date()))!
+    private func sharePDF(at url: URL) {
+        guard let root = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first?.keyWindow?.rootViewController else {
+            return
+        }
         
-        // Sum of regular expenses
-        let expenseSum = expenses
-            .filter { $0.date >= startOfMonth }
-            .reduce(Decimal.zero) { $0 + $1.amount }
-        
-        // Sum of paid, recurring transactions
-        let recurringSum = transactions
-            .filter {
-                $0.isPaid &&
-                ($0.frequencyRaw == "monthly" || $0.dueDate.map { $0 >= startOfMonth } ?? false)
-            }
-            .reduce(Decimal.zero) { $0 + Decimal($1.amount) }
-        
-        return expenseSum + recurringSum
+        let vc = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+        root.present(vc, animated: true)
     }
 }
 
-struct SectionHeader: View {
-    let icon: String
+private struct SectionHeader: View {
     let title: String
-    let accent: Color
-    
-    init(icon: String, title: String, accent: Color) {
-        self.icon = icon
-        self.title = title
-        self.accent = accent
-    }
+    let systemImage: String
     
     var body: some View {
         HStack(spacing: 8) {
-            Image(systemName: icon)
-                .foregroundColor(accent)
-                .font(.title3)
+            Image(systemName: systemImage)
+                .font(.headline)
             Text(title)
-                .font(.title2.weight(.semibold))
-                .foregroundColor(.primary)
+                .font(.title2.bold())
             Spacer()
         }
-        .padding(.bottom, 8)
-        .overlay(
-            Rectangle()
-                .fill(accent.opacity(0.3))
-                .frame(height: 3)
-                .cornerRadius(2),
-            alignment: .bottom
-        )
+        .padding(.horizontal)
     }
 }
 
-struct BillCard: View {
-    let transaction: Transaction
+
+
+
+import SwiftUI
+
+struct MonthOverviewView: View {
+    let remaining: Decimal
+    let budgeted: Decimal
     
     var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(transaction.name)
+        VStack(alignment: .leading, spacing: 4) {
+            Text(remaining, format: .currency(code: "USD"))
+                .font(.system(size: 42, weight: .bold))
+            
+            Text("Out of \(budgeted, format: .currency(code: "USD")) budgeted")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal)
+    }
+}
+
+import SwiftUI
+
+struct CashFlowSectionView: View {
+    let income: Decimal
+    let expense: Decimal
+    let incomeChartData: [Double]
+    let expenseChartData: [Double]
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            //                NavigationLink {
+            //                    IncomeDetailView()
+            //                } label: {
+            MetricCardView(
+                title: "Income",
+                value: income,
+                color: .green,
+                chartData: incomeChartData
+            )
+            //                }
+            //                .buttonStyle(.plain)
+            
+            //                NavigationLink {
+            //                    ExpenseDetailView()
+            //                } label: {
+            MetricCardView(
+                title: "Expenses",
+                value: expense,
+                color: .red,
+                chartData: expenseChartData
+            )
+            //                }
+            //                .buttonStyle(.plain)
+        }
+        .padding(.horizontal)
+        //        }
+    }
+}
+
+struct MetricCardView: View {
+    let title: String
+    let value: Decimal
+    let color: Color
+    let chartData: [Double]
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(title)
                     .font(.headline)
-                    .foregroundColor(.primary)
-                if let dueDate = transaction.dueDate {
-                    Text("Due \(dueDate.formatted(date: .abbreviated, time: .omitted))")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
+                Spacer()
+                //                Image(systemName: "chevron.right")
+                //                    .font(.caption)
+                //                    .foregroundColor(.secondary)
             }
             
-            Spacer()
+            Text(value, format: .currency(code: "USD"))
+                .font(.system(size: 28, weight: .bold))
+                .foregroundColor(color)
             
-            Text(transaction.amount, format: .currency(code: transaction.currencyCode))
-                .font(.headline)
-                .foregroundColor(.accentColor)
+            BarChart(data: chartData, color: color)
         }
         .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color(.systemBackground))
-                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 3)
-        )
-        .contentShape(RoundedRectangle(cornerRadius: 16))
+        .background(RoundedRectangle(cornerRadius: 12)
+            .fill(Color(.secondarySystemBackground)))
     }
 }
 
-struct ExpenseRow: View {
-    let expense: Expense
-    
-    var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(expense.vendor)
-                    .font(.body.weight(.medium))
-                    .foregroundColor(.primary)
-                Text(expense.date.formatted(date: .abbreviated, time: .omitted))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            
-            Spacer()
-            
-            Text(expense.amount, format: .currency(code: "USD"))
-                .font(.body.weight(.semibold))
-                .foregroundColor(.accentColor)
-        }
-        .padding(.vertical, 6)
-        .padding(.horizontal)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.secondarySystemBackground))
-        )
-    }
+
+
+enum CashFlowType {
+    case income
+    case expense
 }
 
-struct ChartView: View {
-    let data: [(String, Decimal)]
+
+import Charts
+import SwiftUI
+
+struct BarChart: View {
+    let data: [Double]
+    let color: Color
     
-    var body: some View {
-        let entries = data.map { VendorSpending(vendor: $0.0, amount: $0.1) }
+    struct DailyEntry: Identifiable {
+        let date: Date
+        let value: Double
         
-        Chart(entries) { item in
-            BarMark(
-                x: .value("Vendor", item.vendor),
-                y: .value("Amount", (item.amount as NSDecimalNumber).doubleValue)
-            )
-            .foregroundStyle(LinearGradient(
-                colors: [.green.opacity(0.8), .green.opacity(0.3)],
-                startPoint: .bottom,
-                endPoint: .top))
-            .cornerRadius(5)
+        var id: Date { date }
+        
+        var label: String {
+            let day = Calendar.current.component(.day, from: date)
+            return day == 1 || day % 5 == 0 ? "\(day)" : ""
         }
-        .chartXAxis {
-            AxisMarks(values: .automatic) { _ in
-                AxisGridLine().foregroundStyle(.clear)
-                AxisTick().foregroundStyle(.gray.opacity(0.5))
-                AxisValueLabel()
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .offset(x: -5, y: 0)
+    }
+    
+    var entries: [DailyEntry] {
+        let calendar = Calendar.current
+        let now = Date()
+        let range = calendar.range(of: .day, in: .month, for: now)!
+        let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: now))!
+        
+        return range.enumerated().compactMap { index, _ in
+            guard index < data.count else { return nil }
+            let date = calendar.date(byAdding: .day, value: index, to: startOfMonth)!
+            return DailyEntry(date: date, value: data[index])
+        }
+    }
+    
+    var body: some View {
+        Chart {
+            ForEach(entries) { item in
+                BarMark(
+                    x: .value("Day", item.date),
+                    y: .value("Value", item.value)
+                )
+                .foregroundStyle(color.opacity(0.8))
+                .cornerRadius(2)
             }
         }
-        .chartYAxis {
-            AxisMarks(position: .leading)
+        .frame(height: 100)
+        .chartYAxis(.hidden)
+        .chartXAxis {
+            AxisMarks(values: .stride(by: .day, count: 5)) { value in
+                AxisGridLine()
+                AxisTick()
+                AxisValueLabel {
+                    if let date = value.as(Date.self) {
+                        let day = Calendar.current.component(.day, from: date)
+                        Text("\(day)")
+                    }
+                }
+            }
         }
-        .padding(.horizontal, 10)
     }
 }
 
-import Foundation
 
-struct VendorSpending: Identifiable {
-    let id = UUID()
-    let vendor: String
-    let amount: Decimal
+
+
+
+struct IncomeDetailView: View {
+    var body: some View {
+        Text("Income Details")
+    }
+}
+
+struct ExpenseDetailView: View {
+    var body: some View {
+        Text("Expense Details")
+    }
+}
+
+
+
+import SwiftUI
+import Charts
+
+struct SpendingSectionView: View {
+    let expenses: [Expense]
+    
+    private struct MonthSpend: Identifiable {
+        let id = UUID()
+        let month: String
+        let amount: Double
+    }
+    
+    private var lastFour: [MonthSpend] {
+        let cal = Calendar.current
+        let today = Date()
+        let df = DateFormatter()
+        df.dateFormat = "LLL"
+        
+        return (0..<4).reversed().compactMap { offset in
+            guard let d = cal.date(byAdding: .month, value: -offset, to: today) else { return nil }
+            let comps = cal.dateComponents([.year, .month], from: d)
+            let totalDecimal = expenses
+                .filter { cal.component(.year, from: $0.date) == comps.year
+                    && cal.component(.month, from: $0.date) == comps.month }
+                .reduce(Decimal(0)) { $0 + $1.amount }
+            let total = (totalDecimal as NSDecimalNumber).doubleValue
+            return MonthSpend(month: df.string(from: d), amount: total)
+        }
+    }
+    
+    private var lastMonthTotal: Double {
+        guard lastFour.count >= 2 else { return 0 }
+        return lastFour[lastFour.count - 2].amount
+    }
+    
+    private var thisMonthTotal: Double {
+        lastFour.last?.amount ?? 0
+    }
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            CardView {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Spent").font(.subheadline)
+                    Text(thisMonthTotal, format: .currency(code: "USD"))
+                        .font(.title2).bold()
+                    HStack(spacing: 4) {
+                        Image(systemName: (thisMonthTotal - lastMonthTotal) >= 0
+                              ? "arrow.up"
+                              : "arrow.down")
+                        .font(.caption)
+                        
+                        let diff = thisMonthTotal - lastMonthTotal
+                        let isIncrease = diff >= 0
+                        
+                        Text("\(abs(diff), format: .currency(code: "USD")) \(isIncrease ? "more" : "less") than last month")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .frame(height: 122)
+            }
+            
+            CardView {
+                Chart {
+                    ForEach(lastFour) { item in
+                        BarMark(
+                            x: .value("Month", item.month),
+                            y: .value("Spent", item.amount)
+                        )
+                    }
+                }
+                .frame(height: 100)
+                .chartYAxis(.hidden)
+                .chartXAxis {
+                    AxisMarks(values: .automatic) { _ in
+                        AxisTick()
+                        AxisValueLabel()
+                    }
+                }
+                .frame(height: 127)
+            }
+        }
+        .padding(.horizontal)
+    }
+}
+
+
+
+import SwiftUI
+
+struct CardView<Content: View>: View {
+    @ViewBuilder let content: () -> Content
+    
+    var body: some View {
+        content()
+            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(.ultraThinMaterial)
+            .cornerRadius(16)
+    }
+}
+
+
+import SwiftUI
+
+struct LabelPanel<ValueStyle: FormatStyle>: View where ValueStyle.FormatInput == Decimal {
+    let label: String
+    let value: Decimal
+    let format: ValueStyle
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label).font(.subheadline)
+            //            Text(value, format: format)
+            //                .font(.title2).bold()
+        }
+    }
+}
+
+
+import SwiftUI
+
+struct BudgetCardView: View {
+    let bill: Transaction
+    
+    var body: some View {
+        let amt = BudgetController.normalize(
+            amount: Decimal(bill.amount),
+            from: BillFrequency(rawValue: bill.frequencyRaw) ?? .monthly,
+            to: .monthly
+        )
+        
+        return VStack(spacing: 8) {
+            Image(systemName: "tag")
+                .font(.title2)
+            Text(bill.name).font(.subheadline).lineLimit(1)
+            Text(amt, format: .currency(code: bill.currencyCode))
+                .font(.headline)
+        }
+        .padding()
+        .frame(width: 100)
+        .background(.ultraThinMaterial)
+        .cornerRadius(12)
+    }
+}
+
+
+
+
+
+
+
+
+// Shared Models & Helpers
+import SwiftUI
+import Charts
+import SwiftData
+
+// 4. Upcoming Payments
+struct UpcomingPaymentsView: View {
+    @Environment(BudgetController.self) private var budget
+    @Query private var bills: [Transaction]
+    
+    var body: some View {
+        List(budget.upcomingPayments(bills: bills)) { bill in
+            VStack(alignment: .leading) {
+                Text(bill.name)
+                Text(bill.dueDate!, style: .date).font(.caption)
+                Text(bill.amount.formatted(.currency(code: bill.currencyCode))).font(.caption2)
+            }
+        }
+    }
+}
+
+
+// 6. Income vs. Expenses Over Time
+struct IncomeVsExpensesChartView: View {
+    @Environment(BudgetController.self) private var budget
+    @Query private var incomes: [Income]
+    @Query private var expenses: [Expense]
+    
+    var body: some View {
+        Chart {
+            ForEach(Array(budget.chartData(for: incomes).enumerated()), id: \ .offset) { hour, value in
+                LineMark(x: .value("Hour", hour), y: .value("Income", value))
+                    .foregroundStyle(.green)
+            }
+            ForEach(Array(budget.chartData(for: expenses).enumerated()), id: \ .offset) { hour, value in
+                LineMark(x: .value("Hour", hour), y: .value("Expenses", value))
+                    .foregroundStyle(.red)
+            }
+        }
+        .frame(height: 200)
+    }
+}
+
+// 15. Smart Suggestions
+struct SmartSuggestionsView: View {
+    @Environment(BudgetController.self) private var budget
+    @Query private var incomes: [Income]
+    @Query private var expenses: [Expense]
+    @Query private var bills: [Transaction]
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            if budget.spendingProgress(bills: bills, expenses: expenses, incomes: incomes, for: .monthly) > 0.9 {
+                Label("You’re spending more than 90% of your income", systemImage: "exclamationmark.triangle")
+            }
+            if budget.upcomingPayments(bills: bills).isEmpty {
+                Label("No bills in the next 7 days — good time to save!", systemImage: "lightbulb")
+            }
+        }
+        .padding()
+    }
+}
+
+// 16. Savings Forecast
+struct SavingsForecastView: View {
+    @Environment(BudgetController.self) private var budget
+    @Query private var incomes: [Income]
+    @Query private var expenses: [Expense]
+    @Query private var bills: [Transaction]
+    
+    var body: some View {
+        let savings = budget.remainingBudget(bills: bills, expenses: expenses, incomes: incomes, for: .monthly)
+        VStack(alignment: .leading) {
+            Text("Forecasted Savings")
+                .font(.headline)
+            Text(savings.formatted(.currency(code: "USD")))
+                .foregroundStyle(.green)
+        }
+        .padding()
+    }
+}
+
+// 17. Budget History (simplified version)
+struct BudgetHistoryView: View {
+    @Query private var incomes: [Income]
+    @Query private var expenses: [Expense]
+    
+    var body: some View {
+        List {
+            ForEach(0..<6, id: \.self) { offset in
+                let date = Calendar.current.date(byAdding: .month, value: -offset, to: .now)!
+                let income = incomes.filter { Calendar.current.isDate($0.date, equalTo: date, toGranularity: .month) }.reduce(0) { $0 + $1.amount }
+                let expense = expenses.filter { Calendar.current.isDate($0.date, equalTo: date, toGranularity: .month) }.reduce(0) { $0 + $1.amount }
+                HStack {
+                    Text(date.formatted(.dateTime.month()))
+                    Spacer()
+                    Text("Net: \((income - expense).formatted(.currency(code: "USD")))")
+                }
+            }
+        }
+    }
 }

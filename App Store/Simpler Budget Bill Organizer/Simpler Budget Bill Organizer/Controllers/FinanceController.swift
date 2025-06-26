@@ -1,74 +1,101 @@
 import Foundation
-import NotificationCenter
+import FinanceKit
 
-@Observable class FinanceController {
-    var salary: Double = 0
-    var hourlyRate: Double = 0
-    var freelanceMonthly: Double = 0
+struct FinanceController {
     
-    var workSchedule: WorkSchedule = .fullTime
+    // MARK: - Weekly Spending Total
     
-    private var monthsPerYear: Double { 12 }
-    private var weeksPerYear: Double { 52 }
-    private var daysPerYear: Double { 364 }
+    static func calculateWeeklySpendingTotal() async throws -> Decimal {
+        let accounts = try await FinanceStore.shared.accounts(query: AccountQuery())
+        var total: Decimal = 0
+        
+        for account in accounts {
+            total += try await calculateTotal(for: account)
+        }
+        
+        // Spending is represented as negative values
+        return -total
+    }
     
-    func monthlyExpenses(from bills: [Transaction]) -> Double {
-        bills.reduce(0) { partial, bill in
-            partial + bill.amount * bill.frequency.toMonthly
+    static func calculateTotal(for account: Account) async throws -> Decimal {
+        let startOfWeek = Date.startOfWeek
+        
+        let transactionQuery = TransactionQuery(
+            predicate: #Predicate<FinanceKit.Transaction> {
+                $0.accountID == account.id && $0.transactionDate > startOfWeek
+            }
+        )
+        
+        let transactions = try await FinanceStore.shared.transactions(query: transactionQuery)
+        
+        let filteredTransactions = getSpendingTransactions(for: transactions)
+        
+        if account.assetAccount != nil {
+            return totalForAssetTransactions(filteredTransactions)
+        } else if account.liabilityAccount != nil {
+            return totalForLiabilityTransactions(filteredTransactions)
+        } else {
+            return 0
         }
     }
     
-    func neededAnnual(from bills: [Transaction]) -> Double {
-        monthlyExpenses(from: bills) * monthsPerYear
+    static func getSpendingTransactions(for transactions: [FinanceKit.Transaction]) -> [FinanceKit.Transaction] {
+        let allowedTypes: [TransactionType] = [.check, .pointOfSale, .unknown]
+        
+        return transactions.filter {
+            allowedTypes.contains($0.transactionType)
+        }
     }
     
-    func neededMonthly(from bills: [Transaction]) -> Double {
-        monthlyExpenses(from: bills)
-    }
-    
-    func neededWeekly(from bills: [Transaction]) -> Double {
-        neededAnnual(from: bills) / weeksPerYear
-    }
-    
-    func neededDaily(from bills: [Transaction]) -> Double {
-        neededAnnual(from: bills) / daysPerYear
-    }
-    
-    func neededHourly(from bills: [Transaction]) -> Double {
-        neededAnnual(from: bills) / workSchedule.hoursPerYear
-    }
-    
-    func requestNotificationPermission() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
-            if granted {
-                print("Notification permission granted.")
-            } else if let error = error {
-                print("Error: \(error.localizedDescription)")
+    static func totalForAssetTransactions(_ transactions: [FinanceKit.Transaction]) -> Decimal {
+        transactions.reduce(0) { partialResult, transaction in
+            let amount = transaction.transactionAmount.amount
+            switch transaction.creditDebitIndicator {
+            case .credit:
+                return partialResult + amount
+            case .debit:
+                return partialResult - amount
+            default:
+                return partialResult
             }
         }
     }
     
-    func scheduleNotification(for bill: Transaction) {
-        guard let dueDate = bill.dueDate, bill.remindMe else { return }
-        
-        let content = UNMutableNotificationContent()
-        content.title = "Upcoming Bill: \(bill.name)"
-        content.body = "Don't forget to pay \(bill.name)"
-        content.sound = .default
-        
-        let triggerDate = Calendar.current.dateComponents([.year, .month, .day], from: dueDate)
-        let trigger = UNCalendarNotificationTrigger(dateMatching: triggerDate, repeats: false)
-        
-        let request = UNNotificationRequest(
-            identifier: bill.id.uuidString,
-            content: content,
-            trigger: trigger
-        )
-        
-        UNUserNotificationCenter.current().add(request)
+    static func totalForLiabilityTransactions(_ transactions: [FinanceKit.Transaction]) -> Decimal {
+        transactions.reduce(0) { partialResult, transaction in
+            let amount = transaction.transactionAmount.amount
+            switch transaction.creditDebitIndicator {
+            case .credit:
+                return partialResult - amount
+            case .debit:
+                return partialResult + amount
+            default:
+                return partialResult
+            }
+        }
     }
     
-    func cancelNotification(for bill: Transaction) {
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [bill.id.uuidString])
+    // MARK: - Fetch Transactions
+    
+    static func fetchLastWeekOfTransactions() async throws -> [FinanceKit.Transaction] {
+        let startOfWeek = Date.startOfWeek
+        
+        return try await FinanceStore.shared.transactions(
+            query: TransactionQuery(
+                sortDescriptors: [.init(\.transactionDate, order: .reverse)],
+                predicate: #Predicate<FinanceKit.Transaction> {
+                    $0.transactionDate > startOfWeek
+                }
+            )
+        )
+    }
+    
+    static func fetchAllTransactions() async throws -> [FinanceKit.Transaction] {
+        return try await FinanceStore.shared.transactions(
+            query: TransactionQuery(
+                sortDescriptors: [.init(\.transactionDate, order: .reverse)]
+                // No predicate = fetch everything available
+            )
+        )
     }
 }

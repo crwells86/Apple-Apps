@@ -7,19 +7,32 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		0049E72E2DD30E2500E9E64F /* Simpler Budget Bill Organizer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Simpler Budget Bill Organizer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		0096C7132E060E79003716D8 /* Grocery List Maker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Grocery List Maker.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		0096C7272E0675F1003716D8 /* Exceptions for "Grocery List Maker" folder in "Grocery List Maker" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				ShoppingDataModel.xcdatamodeld,
+			);
+			target = 0096C7122E060E79003716D8 /* Grocery List Maker */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		0049E7302DD30E2500E9E64F /* Simpler Budget Bill Organizer */ = {
+		0096C7152E060E79003716D8 /* Grocery List Maker */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Simpler Budget Bill Organizer";
+			exceptions = (
+				0096C7272E0675F1003716D8 /* Exceptions for "Grocery List Maker" folder in "Grocery List Maker" target */,
+			);
+			path = "Grocery List Maker";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		0049E72B2DD30E2500E9E64F /* Frameworks */ = {
+		0096C7102E060E79003716D8 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -29,18 +42,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		0049E7252DD30E2500E9E64F = {
+		0096C70A2E060E79003716D8 = {
 			isa = PBXGroup;
 			children = (
-				0049E7302DD30E2500E9E64F /* Simpler Budget Bill Organizer */,
-				0049E72F2DD30E2500E9E64F /* Products */,
+				0096C7152E060E79003716D8 /* Grocery List Maker */,
+				0096C7142E060E79003716D8 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		0049E72F2DD30E2500E9E64F /* Products */ = {
+		0096C7142E060E79003716D8 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				0049E72E2DD30E2500E9E64F /* Simpler Budget Bill Organizer.app */,
+				0096C7132E060E79003716D8 /* Grocery List Maker.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,64 +61,64 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		0049E72D2DD30E2500E9E64F /* Simpler Budget Bill Organizer */ = {
+		0096C7122E060E79003716D8 /* Grocery List Maker */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 0049E7392DD30E2700E9E64F /* Build configuration list for PBXNativeTarget "Simpler Budget Bill Organizer" */;
+			buildConfigurationList = 0096C71E2E060E7B003716D8 /* Build configuration list for PBXNativeTarget "Grocery List Maker" */;
 			buildPhases = (
-				0049E72A2DD30E2500E9E64F /* Sources */,
-				0049E72B2DD30E2500E9E64F /* Frameworks */,
-				0049E72C2DD30E2500E9E64F /* Resources */,
+				0096C70F2E060E79003716D8 /* Sources */,
+				0096C7102E060E79003716D8 /* Frameworks */,
+				0096C7112E060E79003716D8 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				0049E7302DD30E2500E9E64F /* Simpler Budget Bill Organizer */,
+				0096C7152E060E79003716D8 /* Grocery List Maker */,
 			);
-			name = "Simpler Budget Bill Organizer";
+			name = "Grocery List Maker";
 			packageProductDependencies = (
 			);
-			productName = "Simpler Budget Bill Organizer";
-			productReference = 0049E72E2DD30E2500E9E64F /* Simpler Budget Bill Organizer.app */;
+			productName = "Grocery List Maker";
+			productReference = 0096C7132E060E79003716D8 /* Grocery List Maker.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		0049E7262DD30E2500E9E64F /* Project object */ = {
+		0096C70B2E060E79003716D8 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1630;
 				LastUpgradeCheck = 1630;
 				TargetAttributes = {
-					0049E72D2DD30E2500E9E64F = {
+					0096C7122E060E79003716D8 = {
 						CreatedOnToolsVersion = 16.3;
 					};
 				};
 			};
-			buildConfigurationList = 0049E7292DD30E2500E9E64F /* Build configuration list for PBXProject "Simpler Budget Bill Organizer" */;
+			buildConfigurationList = 0096C70E2E060E79003716D8 /* Build configuration list for PBXProject "Grocery List Maker" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = 0049E7252DD30E2500E9E64F;
+			mainGroup = 0096C70A2E060E79003716D8;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 0049E72F2DD30E2500E9E64F /* Products */;
+			productRefGroup = 0096C7142E060E79003716D8 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				0049E72D2DD30E2500E9E64F /* Simpler Budget Bill Organizer */,
+				0096C7122E060E79003716D8 /* Grocery List Maker */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		0049E72C2DD30E2500E9E64F /* Resources */ = {
+		0096C7112E060E79003716D8 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -115,7 +128,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		0049E72A2DD30E2500E9E64F /* Sources */ = {
+		0096C70F2E060E79003716D8 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -125,7 +138,7 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		0049E7372DD30E2700E9E64F /* Debug */ = {
+		0096C71C2E060E7B003716D8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -189,7 +202,7 @@
 			};
 			name = Debug;
 		};
-		0049E7382DD30E2700E9E64F /* Release */ = {
+		0096C71D2E060E7B003716D8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -246,34 +259,30 @@
 			};
 			name = Release;
 		};
-		0049E73A2DD30E2700E9E64F /* Debug */ = {
+		0096C71F2E060E7B003716D8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "Simpler Budget Bill Organizer/Simpler Budget Bill Organizer.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "Grocery List Maker/Grocery List Maker.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 33NUGZ4GWE;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Simpler-Budget-Bill-Organizer-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Simpler Budget";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Simpler Budget Bill Organizer uses the microphone to capture your voice when logging expenses by speech. For example, you can say “Paid rent yesterday” instead of typing.";
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Simpler Budget Bill Organizer uses speech recognition to let you log expenses by speaking naturally, like “Spent five dollars on coffee.” Your voice is processed entirely on your device.";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.5;
-				PRODUCT_BUNDLE_IDENTIFIER = com.calebrwells.BillOrganizer;
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.calebrwells.grocerylist;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -285,34 +294,30 @@
 			};
 			name = Debug;
 		};
-		0049E73B2DD30E2700E9E64F /* Release */ = {
+		0096C7202E060E7B003716D8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "Simpler Budget Bill Organizer/Simpler Budget Bill Organizer.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "Grocery List Maker/Grocery List Maker.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 33NUGZ4GWE;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Simpler-Budget-Bill-Organizer-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Simpler Budget";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Simpler Budget Bill Organizer uses the microphone to capture your voice when logging expenses by speech. For example, you can say “Paid rent yesterday” instead of typing.";
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Simpler Budget Bill Organizer uses speech recognition to let you log expenses by speaking naturally, like “Spent five dollars on coffee.” Your voice is processed entirely on your device.";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.5;
-				PRODUCT_BUNDLE_IDENTIFIER = com.calebrwells.BillOrganizer;
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.calebrwells.grocerylist;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -327,25 +332,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		0049E7292DD30E2500E9E64F /* Build configuration list for PBXProject "Simpler Budget Bill Organizer" */ = {
+		0096C70E2E060E79003716D8 /* Build configuration list for PBXProject "Grocery List Maker" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				0049E7372DD30E2700E9E64F /* Debug */,
-				0049E7382DD30E2700E9E64F /* Release */,
+				0096C71C2E060E7B003716D8 /* Debug */,
+				0096C71D2E060E7B003716D8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		0049E7392DD30E2700E9E64F /* Build configuration list for PBXNativeTarget "Simpler Budget Bill Organizer" */ = {
+		0096C71E2E060E7B003716D8 /* Build configuration list for PBXNativeTarget "Grocery List Maker" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				0049E73A2DD30E2700E9E64F /* Debug */,
-				0049E73B2DD30E2700E9E64F /* Release */,
+				0096C71F2E060E7B003716D8 /* Debug */,
+				0096C7202E060E7B003716D8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 0049E7262DD30E2500E9E64F /* Project object */;
+	rootObject = 0096C70B2E060E79003716D8 /* Project object */;
 }

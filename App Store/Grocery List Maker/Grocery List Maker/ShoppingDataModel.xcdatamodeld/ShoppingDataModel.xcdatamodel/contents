@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23788" systemVersion="24F74" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="YES" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
+    <entity name="ShoppingItem" representedClassName="ShoppingItem" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isChecked" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <attribute name="note" optional="YES" attributeType="String"/>
+        <attribute name="tags" optional="YES" attributeType="String"/>
+        <relationship name="list" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="ShoppingList" inverseName="items" inverseEntity="ShoppingList"/>
+    </entity>
+    <entity name="ShoppingList" representedClassName="ShoppingList" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <relationship name="items" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ShoppingItem" inverseName="list" inverseEntity="ShoppingItem"/>
+        <relationship name="store" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="StoreCategory" inverseName="lists" inverseEntity="StoreCategory"/>
+    </entity>
+    <entity name="StoreCategory" representedClassName="StoreCategory" syncable="YES" codeGenerationType="class">
+        <attribute name="colorHex" optional="YES" attributeType="String"/>
+        <attribute name="icon" optional="YES" attributeType="String"/>
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <relationship name="lists" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ShoppingList" inverseName="store" inverseEntity="ShoppingList"/>
+    </entity>
+</model>
