@@ -188,17 +188,22 @@ struct ModePickerView: View {
 struct ManualEntryView: View {
     var onSave: (Expense) -> Void
     @Environment(\.dismiss) private var dismiss
-    
+
     @State private var amount = ""
     @State private var vendor = ""
     @State private var selectedCategory: ExpenseCategory = .miscellaneous
-    
+    @State private var date = Date() // Default to now
+
     var body: some View {
         NavigationView {
             Form {
                 TextField("Amount", text: $amount)
                     .keyboardType(.decimalPad)
+
                 TextField("Vendor", text: $vendor)
+
+                DatePicker("Date", selection: $date, displayedComponents: [.date])
+
                 Picker("Category", selection: $selectedCategory) {
                     ForEach(ExpenseCategory.allCases) { category in
                         Text(category.label)
@@ -206,6 +211,7 @@ struct ManualEntryView: View {
                     }
                 }
             }
+            .padding(.top)
             .navigationTitle("New Expense")
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
@@ -214,16 +220,20 @@ struct ManualEntryView: View {
                         let expense = Expense(
                             amount: decimalAmount,
                             vendor: vendor,
-                            date: .now,
+                            date: date, // Use selected date
                             category: selectedCategory
                         )
                         onSave(expense)
                     }
                 }
+
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button("Cancel") {
+                        dismiss()
+                    }
                 }
             }
         }
     }
 }
+

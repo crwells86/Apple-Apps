@@ -67,9 +67,9 @@ struct ContentView: View {
                         .environment(budget)
                     }
                     
-                    Tab("Income", systemImage: "dollarsign.circle", value: 5) {
+                    Tab("Income", systemImage: "dollarsign.circle", value: 4) {
                         if subscriptionController.isSubscribed {
-                            IncomeTabView()
+                            IncomeTabView(tabSelection: $tabSelection)
                         } else {
                             PaywallView()
                         }

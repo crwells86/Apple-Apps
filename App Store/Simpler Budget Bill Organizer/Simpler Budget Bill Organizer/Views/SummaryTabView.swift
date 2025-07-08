@@ -63,25 +63,25 @@ struct SummaryTabView: View {
                     //                    AppleCardAccountView()
                     
                     // MARK: - Budget Summary
-                    SectionHeader(title: "Budget Summary", systemImage: "wallet.pass")
-                    
-                    HStack(spacing: 16) {
-                        ValueCard(
-                            title: "Left to Spend",
-                            value: budget.remainingBudget(
-                                bills: bills,
-                                expenses: expenses + paidBillsAsExpenses,
-                                incomes: incomes,
-                                for: .monthly
-                            ).formatted(.currency(code: "USD"))
-                        )
-                        
-                        InfoTile(
-                            title: "Planned Budget",
-                            value: budget.totalBills(bills, for: .monthly).formatted(.currency(code: "USD"))
-                        )
-                    }
-                    .padding(.horizontal)
+//                    SectionHeader(title: "Budget Summary", systemImage: "wallet.pass")
+//                    
+//                    HStack(spacing: 16) {
+//                        ValueCard(
+//                            title: "Left to Spend",
+//                            value: budget.remainingBudget(
+//                                bills: bills,
+//                                expenses: expenses + paidBillsAsExpenses,
+//                                incomes: incomes,
+//                                for: .monthly
+//                            ).formatted(.currency(code: "USD"))
+//                        )
+//                        
+//                        InfoTile(
+//                            title: "Planned Budget",
+//                            value: budget.totalBills(bills, for: .monthly).formatted(.currency(code: "USD"))
+//                        )
+//                    }
+//                    .padding(.horizontal)
                     
                     // MARK: - Income vs. Spending
                     SectionHeader(title: "Income vs. Spending", systemImage: "chart.xyaxis.line")
@@ -94,7 +94,7 @@ struct SummaryTabView: View {
                     )
                     
                     // MARK: - Spending by Category
-                    SectionHeader(title: "Where Your Money Goes", systemImage: "list.bullet.rectangle")
+                    SectionHeader(title: "Spending Trends", systemImage: "list.bullet.rectangle")
                     
                     SpendingSectionView(expenses: expenses)
                     

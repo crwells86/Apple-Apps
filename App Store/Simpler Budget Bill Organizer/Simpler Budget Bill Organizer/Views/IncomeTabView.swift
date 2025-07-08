@@ -10,6 +10,9 @@ struct IncomeTabView: View {
     @State private var date = Date()
     @State private var frequency: Frequency = .weekly
     
+    @State private var editingIncome: Income? = nil
+    @Binding var tabSelection: Int
+    
     var body: some View {
         NavigationStack {
             Form {
@@ -32,26 +35,104 @@ struct IncomeTabView: View {
                 }
                 
                 Section(header: Text("Logged Incomes")) {
-                    ForEach(incomes) { income in
-                        VStack(alignment: .leading) {
-                            Text(income.source).font(.headline)
-                            Text("$\(income.amount, format: .number)").foregroundColor(.secondary)
-                            Text(income.date, style: .date).font(.footnote).foregroundColor(.gray)
+                    List {
+                        ForEach(incomes) { income in
+                            VStack(alignment: .leading) {
+                                Text(income.source).font(.headline)
+                                Text("$\(income.amount, format: .number)").foregroundColor(.secondary)
+                                Text(income.date, style: .date).font(.footnote).foregroundColor(.gray)
+                            }
+                            .swipeActions(edge: .trailing) {
+                                Button(role: .destructive) {
+                                    deleteIncome(income)
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                                
+                                Button {
+                                    editingIncome = income
+                                } label: {
+                                    Label("Edit", systemImage: "pencil")
+                                }
+                                .tint(.blue)
+                            }
                         }
+                        .onDelete(perform: deleteIncomeAt)
                     }
                 }
             }
             .navigationTitle("Income")
+            .toolbar {
+                if tabSelection == 4 {
+                    ToolbarItem(placement: .primaryAction) {
+                        EditButton()
+                    }
+                }
+            }
+            .sheet(item: $editingIncome) { income in
+                EditIncomeSheet(income: income)
+            }
         }
     }
     
     private func saveIncome() {
         guard let decimalAmount = Decimal(string: amount) else { return }
-        let newIncome = Income(source: source, amount: decimalAmount, date: date)
+        let newIncome = Income(source: source, amount: decimalAmount, date: date, frequency: frequency)
         context.insert(newIncome)
         
         source = ""
         amount = ""
         date = .now
+    }
+    
+    private func deleteIncome(_ income: Income) {
+        context.delete(income)
+    }
+    
+    private func deleteIncomeAt(_ offsets: IndexSet) {
+        for index in offsets {
+            context.delete(incomes[index])
+        }
+    }
+}
+
+
+
+struct EditIncomeSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var context
+    
+    @Bindable var income: Income
+    
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Source", text: $income.source)
+                TextField("Amount", value: $income.amount, format: .number)
+                    .keyboardType(.decimalPad)
+                DatePicker("Date", selection: $income.date, displayedComponents: .date)
+                Picker("Frequency", selection: Binding(
+                    get: { Frequency(rawValue: income.frequencyRaw) ?? .variable },
+                    set: { income.frequencyRaw = $0.rawValue }
+                )) {
+                    ForEach(Frequency.allCases, id: \.self) {
+                        Text($0.rawValue.capitalized)
+                    }
+                }
+            }
+            .navigationTitle("Edit Income")
+            .padding(.top)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel", role: .cancel) { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        // Data is already bound and updated via @Bindable
+                        dismiss()
+                    }
+                }
+            }
+        }
     }
 }

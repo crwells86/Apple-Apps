@@ -25,10 +25,25 @@ struct ExpenseTrackerView: View {
     }
     
     // Filter expenses by date and optional category
+//    private var filteredExpenses: [Expense] {
+//        let fromDate = selectedTimeframe.startDate()
+//        return allExpenses
+//            .filter { $0.date >= fromDate }
+//            .filter { expense in
+//                guard let category = selectedCategoryFilter else { return true }
+//                return expense.category == category
+//            }
+//    }
+    
+    @State private var customStartDate = Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? .now
+    @State private var customEndDate = Date()
+
     private var filteredExpenses: [Expense] {
-        let fromDate = selectedTimeframe.startDate()
+        let startDate = selectedTimeframe.startDate(customStart: customStartDate)
+        let endDate = selectedTimeframe == .custom ? customEndDate : Date()
+
         return allExpenses
-            .filter { $0.date >= fromDate }
+            .filter { $0.date >= startDate && $0.date <= endDate }
             .filter { expense in
                 guard let category = selectedCategoryFilter else { return true }
                 return expense.category == category
@@ -46,7 +61,7 @@ struct ExpenseTrackerView: View {
     private var monthlyBudgetPerCurrentTimeframe: Decimal {
         let calendar = Calendar.current
         let now = Date()
-        let trackingStartDate = Date(timeIntervalSince1970: 1_704_000_000)
+//        let trackingStartDate = Date(timeIntervalSince1970: 1_704_000_000)
         
         switch selectedTimeframe {
         case .hour:
@@ -62,10 +77,15 @@ struct ExpenseTrackerView: View {
             return monthlyBudget
         case .year:
             return monthlyBudget * 12
-        case .allTime:
-            let components = calendar.dateComponents([.month], from: trackingStartDate, to: now)
-            let monthsElapsed = max(components.month ?? 1, 1)
-            return monthlyBudget * Decimal(monthsElapsed)
+//        case .allTime:
+//            let components = calendar.dateComponents([.month], from: trackingStartDate, to: now)
+//            let monthsElapsed = max(components.month ?? 1, 1)
+//            return monthlyBudget * Decimal(monthsElapsed)
+        case .custom:
+            let daysInMonth = calendar.range(of: .day, in: .month, for: now)?.count ?? 30
+            let days = calendar.dateComponents([.day], from: customStartDate, to: customEndDate).day ?? 1
+            let normalizedDays = max(min(days, daysInMonth), 1) // Clamp to avoid division by zero
+            return monthlyBudget / Decimal(daysInMonth) * Decimal(normalizedDays)
         }
     }
     
@@ -110,6 +130,15 @@ struct ExpenseTrackerView: View {
                 
                 // Timeframe picker
                 TimeframePickerView(selectedTimeframe: $selectedTimeframe)
+                
+                if selectedTimeframe == .custom {
+                    VStack {
+                        DatePicker("Start Date", selection: $customStartDate, displayedComponents: .date)
+                        DatePicker("End Date", selection: $customEndDate, in: customStartDate..., displayedComponents: .date)
+                    }
+                    .padding(.horizontal)
+                    .transition(.opacity)
+                }
                 
                 // Category filter picker
                 HStack {

@@ -1,34 +1,28 @@
 import Foundation
 
 enum Timeframe: String, CaseIterable, Identifiable {
-    case hour = "Hour"
-    case day = "Day"
-    case week = "Week"
-    case month = "Month"
-    case year = "Year"
-    case allTime = "All Time" // ✅ New case
+    case hour, day, week, month, year, custom // allTime,
 
     var id: String { rawValue }
 
-    func startDate(trackingStartDate: Date? = nil) -> Date {
-        let cal = Calendar.current
+    func startDate(customStart: Date? = nil) -> Date {
+        let calendar = Calendar.current
         let now = Date()
         switch self {
         case .hour:
-            return cal.date(byAdding: .hour, value: -1, to: now) ?? now
+            return calendar.date(byAdding: .hour, value: -1, to: now) ?? now
         case .day:
-            return cal.startOfDay(for: now)
+            return calendar.date(byAdding: .day, value: -1, to: now) ?? now
         case .week:
-            let comps = cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)
-            return cal.date(from: comps) ?? now
+            return calendar.date(byAdding: .day, value: -7, to: now) ?? now
         case .month:
-            let comps = cal.dateComponents([.year, .month], from: now)
-            return cal.date(from: comps) ?? now
+            return calendar.date(byAdding: .month, value: -1, to: now) ?? now
         case .year:
-            let comps = cal.dateComponents([.year], from: now)
-            return cal.date(from: comps) ?? now
-        case .allTime:
-            return trackingStartDate ?? .distantPast
+            return calendar.date(byAdding: .year, value: -1, to: now) ?? now
+//        case .allTime:
+//            return Date(timeIntervalSince1970: 1_704_000_000) // or your earliest tracked date
+        case .custom:
+            return customStart ?? now
         }
     }
 }
