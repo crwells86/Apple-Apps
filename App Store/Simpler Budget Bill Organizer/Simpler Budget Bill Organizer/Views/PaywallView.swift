@@ -26,7 +26,7 @@ struct PaywallView: View {
                     PaywallFeature(symbol: "chart.bar.xaxis", text: "Access the Summary tab")
                     PaywallFeature(symbol: "mic.fill", text: "Voice-to-Expense entry")
                     PaywallFeature(symbol: "dollarsign.circle", text: "Track income and auto-budget")
-                    PaywallFeature(symbol: "arrow.up.doc.fill", text: "Export reports to PDF")
+//                    PaywallFeature(symbol: "arrow.up.doc.fill", text: "Export reports to PDF")
                     PaywallFeature(symbol: "lock.shield", text: "Private & offline – no accounts, no ads")
                 }
                 .padding()

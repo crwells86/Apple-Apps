@@ -40,15 +40,15 @@ struct WhatsNewView: View {
     let version: String
     
     private let features: [WhatsNewItem] = [
-        .init(icon: "rectangle.stack.fill.badge.plus",
-              title: "New Expenses Tab",
-              subtitle: "Everything you need to track spending, now in one place."),
-        .init(icon: "plus.circle.fill",
-              title: "Manual Expense Entry",
-              subtitle: "Easily log what you spend, right when it happens."),
-        .init(icon: "chart.pie.fill",
-              title: "Stay on Budget",
-              subtitle: "See how your spending compares to your budget in real time.")
+        .init(icon: "bell.badge.fill",
+              title: "Category Limits",
+              subtitle: "Set spending caps and get notified when you go over."),
+        .init(icon: "slider.horizontal.3",
+              title: "Custom Categories",
+              subtitle: "Create your own categories to track expenses your way.")
+//        .init(icon: "checklist",
+//              title: "Bulk Assign Categories",
+//              subtitle: "Swiftly select and categorize multiple expenses or bills at once.")
     ]
     
     @Environment(\.dismiss) private var dismiss

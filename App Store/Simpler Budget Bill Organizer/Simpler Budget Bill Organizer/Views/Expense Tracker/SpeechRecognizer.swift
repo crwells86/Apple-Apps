@@ -59,220 +59,6 @@ import AVFoundation
 
 
 // MARK: - Expense Parsing
-//func parseAmount(from transcript: String) -> Double? {
-//    let pattern = #"(?:(\$)?(\d{1,6})(?:[.,](\d{1,2}))?)"#
-//    let regex = try! NSRegularExpression(pattern: pattern)
-//    let nsString = transcript as NSString
-//    guard let match = regex.firstMatch(in: transcript, range: NSRange(location: 0, length: nsString.length)) else {
-//        return nil
-//    }
-//    
-//    let hasDollarSign = match.range(at: 1).location != NSNotFound
-//    let dollarsStr = match.range(at: 2).location != NSNotFound ? nsString.substring(with: match.range(at: 2)) : ""
-//    let centsStr = match.range(at: 3).location != NSNotFound ? nsString.substring(with: match.range(at: 3)) : ""
-//    
-//    if hasDollarSign || !centsStr.isEmpty {
-//        // Exact amount or has a dollar sign
-//        let full = centsStr.isEmpty ? dollarsStr : "\(dollarsStr).\(centsStr)"
-//        return Double(full)
-//    } else if let intVal = Int(dollarsStr) {
-//        // No dollar/decimal → assume cents
-//        return Double(intVal) / 100.0
-//    }
-//    
-//    return nil
-//}
-
-//func parseVendorOrCategory(from transcript: String) -> String {
-//    let knownVendors: [String: [String]] = [
-//        // Convenience / Gas
-//        "7-Eleven": ["711", "7 11", "seven eleven", "7-eleven", "7:11"],
-//        "Circle K": ["circle k", "circlek"],
-//        "Wawa": ["wawa"],
-//        "Sheetz": ["sheetz"],
-//        "Casey's": ["caseys", "casey's"],
-//        "Speedway": ["speedway"],
-//        "QuikTrip": ["quiktrip", "qt", "quicktrip"],
-//        "RaceTrac": ["racetrac", "race trac", "race-track"],
-//        "Mobil": ["mobil"],
-//        "Exxon": ["exxon", "exxonmobil"],
-//        "Shell": ["shell"],
-//        "Chevron": ["chevron"],
-//        "BP": ["bp", "british petroleum"],
-//        "Marathon": ["marathon"],
-//        "Sunoco": ["sunoco"],
-//        
-//        // Grocery / Supermarkets
-//        "Walmart": ["walmart", "wal-mart"],
-//        "Target": ["target"],
-//        "Costco": ["costco"],
-//        "Sam's Club": ["sams club", "sam's club"],
-//        "Kroger": ["kroger"],
-//        "Safeway": ["safeway"],
-//        "Publix": ["publix"],
-//        "Albertsons": ["albertsons"],
-//        "Aldi": ["aldi"],
-//        "Whole Foods": ["whole foods", "wholefoods"],
-//        "Trader Joe's": ["trader joes", "trader joe's"],
-//        "HEB": ["heb"],
-//        "Meijer": ["meijer"],
-//        "WinCo": ["winco"],
-//        "Food Lion": ["food lion"],
-//        "Giant": ["giant"],
-//        "Harris Teeter": ["harris teeter"],
-//        "Fry's": ["frys"],
-//        "Piggly Wiggly": ["piggly wiggly"],
-//        "Ralphs": ["ralphs"],
-//        "Stop & Shop": ["stop and shop", "stop & shop"],
-//        "Giant Eagle": ["giant eagle"],
-//        "H-E-B": ["h-e-b", "heb"],
-//        
-//        // Pharmacy / Drug stores
-//        "CVS": ["cvs", "cvs pharmacy"],
-//        "Walgreens": ["walgreens", "walgreens pharmacy"],
-//        "Rite Aid": ["rite aid", "riteaid"],
-//        
-//        // Big Box / Retail
-//        "Best Buy": ["best buy", "bestbuy"],
-//        "Home Depot": ["home depot", "the home depot"],
-//        "Lowe's": ["lowes", "lowe's"],
-//        "IKEA": ["ikea"],
-//        "Dick's Sporting Goods": ["dicks sporting goods", "dick's sporting goods"],
-//        "Bed Bath & Beyond": ["bed bath beyond", "bed bath & beyond"],
-//        "Office Depot": ["office depot"],
-//        "Staples": ["staples"],
-//        "Macy's": ["macys", "macy's"],
-//        "Nordstrom": ["nordstrom"],
-//        "TJ Maxx": ["tj maxx"],
-//        "Marshalls": ["marshalls"],
-//        "Kohl's": ["kohls", "kohl's"],
-//        
-//        // Restaurants / Fast Food
-//        "McDonald's": ["mcdonalds", "macdonalds", "mickey d's", "mickey dees"],
-//        "Starbucks": ["starbucks", "star bucks"],
-//        "Subway": ["subway"],
-//        "Chipotle": ["chipotle"],
-//        "Dunkin'": ["dunkin", "dunkin donuts"],
-//        "Panera Bread": ["panera", "panera bread"],
-//        "Burger King": ["burger king"],
-//        "Taco Bell": ["taco bell"],
-//        "KFC": ["kfc", "kentucky fried chicken"],
-//        "Wendy's": ["wendys", "wendy's"],
-//        "Domino's": ["dominos", "domino's"],
-//        "Pizza Hut": ["pizza hut"],
-//        "Chick-fil-A": ["chick-fil-a", "chickfila", "chick fil a"],
-//        "Five Guys": ["five guys"],
-//        "Sonic": ["sonic"],
-//        "Dairy Queen": ["dairy queen", "dq"],
-//        
-//        // Online / Tech
-//        "Amazon": ["amazon", "amazon.com"],
-//        "Apple": ["apple store", "apple"],
-//        "eBay": ["ebay"],
-//        "Walmart.com": ["walmart.com", "walmart dot com"],
-//        "Etsy": ["etsy"],
-//        "Newegg": ["newegg"],
-//        
-//        // Ride sharing / Delivery
-//        "Uber": ["uber"],
-//        "Lyft": ["lyft"],
-//        "DoorDash": ["doordash"],
-//        "Grubhub": ["grubhub"],
-//        "Postmates": ["postmates"],
-//        "Instacart": ["instacart"],
-//        
-//        // Miscellaneous
-//        "REI": ["rei"],
-//        "Costco Gas": ["costco gas"],
-//        "Sam's Club Gas": ["sams club gas", "sam's club gas"],
-//        "Walgreens Pharmacy": ["walgreens pharmacy"],
-//        "CVS Pharmacy": ["cvs pharmacy"],
-//    ]
-//    
-//    let categories = [
-//        // Food and Drink
-//        "coffee", "bagel", "breakfast", "brunch", "lunch", "dinner", "snack", "meal", "fast food",
-//        "dessert", "pizza", "burger", "sandwich", "soda", "tea", "juice", "alcohol", "bar",
-//        
-//        // Retail and Shopping
-//        "groceries", "supermarket", "pharmacy", "electronics", "clothing", "apparel", "furniture",
-//        "home improvement", "hardware", "office supplies", "beauty", "cosmetics", "books",
-//        
-//        // Services and Transport
-//        "gas", "fuel", "ride", "rideshare", "taxi", "uber", "lyft", "delivery", "shipping",
-//        "movie", "entertainment", "tickets",
-//        
-//        // Financial
-//        "payment", "bill", "subscription", "donation", "tip",
-//        
-//        // General
-//        "miscellaneous", "other"
-//    ]
-//    
-//    // Normalize the transcript
-//    var lowerTranscript = transcript.lowercased()
-//    let normalizationMap: [String: String] = [
-//        // Convenience / Gas
-//        "7:11": "711",
-//        "7 11": "711",
-//        "seven eleven": "711",
-//        "7-eleven": "711",
-//        "sheetz": "sheetz",
-//        "circlek": "circle k",
-//        "racetrac": "race trac",
-//        "quiktrip": "qt",
-//        
-//        // Grocery
-//        "wholefoods": "whole foods",
-//        "trader joes": "trader joe's",
-//        "sams club": "sam's club",
-//        "wal-mart": "walmart",
-//        "heb": "h-e-b",
-//        "stop and shop": "stop & shop",
-//        
-//        // Retail
-//        "bestbuy": "best buy",
-//        "home depot": "the home depot",
-//        "lowes": "lowe's",
-//        "kohls": "kohl's",
-//        "macys": "macy's",
-//        
-//        // Fast Food / Restaurants
-//        "mickey dees": "mcdonalds",
-//        "star bucks": "starbucks",
-//        "dunkin donuts": "dunkin",
-//        "chickfila": "chick-fil-a",
-//        "burgerking": "burger king",
-//        
-//        // Online / Tech
-//        "amazon.com": "amazon",
-//        "walmart dot com": "walmart.com",
-//        
-//        // Ride sharing / Delivery
-//        "doordash": "doordash",
-//        "grub hub": "grubhub",
-//    ]
-//    
-//    for (pattern, replacement) in normalizationMap {
-//        lowerTranscript = lowerTranscript.replacingOccurrences(of: pattern, with: replacement)
-//    }
-//    
-//    // Check for known vendor matches
-//    for (vendor, keywords) in knownVendors {
-//        if keywords.contains(where: { lowerTranscript.contains($0) }) {
-//            return vendor
-//        }
-//    }
-//    
-//    // Check for general category-based fallback
-//    for category in categories {
-//        if lowerTranscript.contains(category) {
-//            return category.capitalized
-//        }
-//    }
-//    
-//    return "Unknown"
-//}
 func parseVendorOrCategory(from transcript: String) -> String {
     // 1. Vendor lookup
     let knownVendors: [String: [String]] = [
@@ -488,28 +274,28 @@ func parseExpense(from transcript: String) -> Expense {
     let vendor = vendorOrCategory
 
     // Map vendorOrCategory to ExpenseCategory
-    let category: ExpenseCategory
-    switch vendorOrCategory.lowercased() {
-    case "7-eleven", "circle k", "wawa", "shell", "exxon":
-        category = .transportation
-    case "walmart", "target", "costco", "whole foods", "trader joe's":
-        category = .food
-    case "starbucks", "mcdonalds", "chipotle", "dunkin":
-        category = .food
-    case "uber", "lyft":
-        category = .transportation
-    case let text where text.contains("subscription"):
-        category = .subscriptions
-    default:
-        category = .miscellaneous
-    }
+//    let category: Category
+//    switch vendorOrCategory.lowercased() {
+//    case "7-eleven", "circle k", "wawa", "shell", "exxon":
+//        category = .transportation
+//    case "walmart", "target", "costco", "whole foods", "trader joe's":
+//        category = .food
+//    case "starbucks", "mcdonalds", "chipotle", "dunkin":
+//        category = .food
+//    case "uber", "lyft":
+//        category = .transportation
+//    case let text where text.contains("subscription"):
+//        category = .subscriptions
+//    default:
+//        category = .miscellaneous
+//    }
 
     let parsedAmount = amountValue ?? 0
     return Expense(
         amount: Decimal(parsedAmount),
         vendor: vendor,
         date: .now,
-        category: category
+        category: nil //Category(name: "TEST", icon: "testtube.2") //category
     )
 }
 

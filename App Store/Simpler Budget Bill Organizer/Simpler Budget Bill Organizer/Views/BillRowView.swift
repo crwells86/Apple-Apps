@@ -9,12 +9,17 @@ struct BillRowView: View {
         let days = nextDueDate.map(daysUntil)
 
         return HStack(alignment: .top) {
-            bill.category.icon
-                .foregroundStyle(.accent)
+            if let icon = bill.category?.icon {
+                iconView(for: icon)
+            }
 
             VStack(alignment: .leading) {
                 Text(bill.name).font(.headline)
-                Text(bill.category.rawValue).font(.subheadline).foregroundStyle(.secondary)
+                if let category = bill.category {
+                    Text(category.name)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
             }
 
             Spacer()
@@ -74,6 +79,17 @@ struct BillRowView: View {
         case ..<1: return .red
         case 1...3: return .orange
         default: return .indigo
+        }
+    }
+    
+    @ViewBuilder
+    private func iconView(for icon: String) -> some View {
+        if UIImage(systemName: icon) != nil {
+            Image(systemName: icon)
+                .foregroundStyle(.accent)
+        } else {
+            Text(icon)
+                .font(.title3)
         }
     }
 }

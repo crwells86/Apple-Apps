@@ -14,21 +14,16 @@ struct BillsListView: View {
     @Binding var tabSelection: Int
     
     @Query(filter: #Predicate<Transaction> { $0.isActive }) private var bills: [Transaction]
+    @Environment(\.modelContext) private var context
     @Environment(BudgetController.self) private var budget: BudgetController
     
-    @Environment(\.modelContext) private var context
-    
     @State private var selectedSort: BillSortOption = .dueDate
-    
     @State private var isEditing = false
-    //    @Environment(\.editMode) private var editMode
-    
     @State private var selectedBills = Set<UUID>() // Use UUID or the Transaction itself if Hashable
     @State private var editMode: EditMode = .inactive
     
     var body: some View {
         NavigationStack {
-            //            Form {
             List(selection: $selectedBills) {
                 Section("Required income to cover bills") {
                     let chartData = BudgetCadence.allCases.map { cadence in
@@ -167,18 +162,18 @@ struct BillsListView: View {
     }
     
     private func markBillAsPaid(_ bill: Transaction) {
-            let expense = Expense(amount: Decimal(bill.amount), vendor: bill.name)
+        let expense = Expense(amount: Decimal(bill.amount), vendor: bill.name)
         
-            context.insert(expense)
-
-            do {
-                try context.save()
-                // Optionally update BudgetController state if needed
-                // e.g., budget.updateTotals() or similar
-            } catch {
-                print("Failed to save expense: \(error)")
-            }
+        context.insert(expense)
+        
+        do {
+            try context.save()
+            // Optionally update BudgetController state if needed
+            // e.g., budget.updateTotals() or similar
+        } catch {
+            print("Failed to save expense: \(error)")
         }
+    }
     
     func deleteSelectedBills() {
         for billID in selectedBills {

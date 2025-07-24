@@ -188,28 +188,64 @@ struct ModePickerView: View {
 struct ManualEntryView: View {
     var onSave: (Expense) -> Void
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var context
+    @Environment(BudgetController.self) private var budget: BudgetController
 
     @State private var amount = ""
     @State private var vendor = ""
-    @State private var selectedCategory: ExpenseCategory = .miscellaneous
     @State private var date = Date() // Default to now
+    
+    @Query(sort: \Category.name) private var categories: [Category]
+    @State private var selectedCategory: Category? = nil
+    @FocusState var isInputActive: Bool
 
     var body: some View {
         NavigationView {
             Form {
                 TextField("Amount", text: $amount)
                     .keyboardType(.decimalPad)
+                    .focused($isInputActive)
+                    .toolbar {
+                        ToolbarItem(placement: .keyboard) {
+                            HStack {
+                                Spacer()
+                                
+                                Button("Done") {
+                                    isInputActive = false
+                                }
+                            }
+                            .padding(.trailing)
+                        }
+                    }
 
                 TextField("Vendor", text: $vendor)
 
                 DatePicker("Date", selection: $date, displayedComponents: [.date])
 
-                Picker("Category", selection: $selectedCategory) {
-                    ForEach(ExpenseCategory.allCases) { category in
-                        Text(category.label)
-                            .tag(category)
+                // Category Picker
+                Picker(selection: $selectedCategory) {
+                    Text("None").tag(Optional<Category>.none)
+                    
+                    ForEach(categories) { category in
+                        Label {
+                            Text(category.name)
+                        } icon: {
+                            iconView(for: category.icon)
+                        }
+                        .tag(Optional(category))
+                    }
+                } label: {
+                    if let selectedCategory = selectedCategory {
+                        Label {
+                            Text(selectedCategory.name)
+                        } icon: {
+                            iconView(for: selectedCategory.icon)
+                        }
+                    } else {
+                        Text("Select Category")
                     }
                 }
+                .pickerStyle(.navigationLink)
             }
             .padding(.top)
             .navigationTitle("New Expense")
@@ -221,8 +257,10 @@ struct ManualEntryView: View {
                             amount: decimalAmount,
                             vendor: vendor,
                             date: date, // Use selected date
-                            category: selectedCategory
+                            category: selectedCategory 
                         )
+                        
+                        budget.checkCategorySpending(categories)
                         onSave(expense)
                     }
                 }
@@ -233,6 +271,15 @@ struct ManualEntryView: View {
                     }
                 }
             }
+        }
+    }
+    
+    @ViewBuilder
+    func iconView(for icon: String) -> some View {
+        if UIImage(systemName: icon) != nil {
+            Image(systemName: icon)
+        } else {
+            Text(icon)
         }
     }
 }

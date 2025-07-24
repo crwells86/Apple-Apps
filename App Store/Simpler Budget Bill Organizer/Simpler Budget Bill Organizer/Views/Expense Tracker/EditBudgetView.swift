@@ -4,6 +4,7 @@ struct EditBudgetView: View {
     @Binding var budget: Double
     @Environment(\.dismiss) private var dismiss
     @State private var input: String
+    @FocusState var isInputActive: Bool
     
     init(budget: Binding<Double>) {
         self._budget = budget
@@ -15,6 +16,19 @@ struct EditBudgetView: View {
             Form {
                 TextField("Weekly Budget", text: $input)
                     .keyboardType(.decimalPad)
+                    .focused($isInputActive)
+                    .toolbar {
+                        ToolbarItem(placement: .keyboard) {
+                            HStack {
+                                Spacer()
+                                
+                                Button("Done") {
+                                    isInputActive = false
+                                }
+                            }
+                            .padding(.trailing)
+                        }
+                    }
             }
             .navigationTitle("Edit Monthly Budget")
             .toolbar {

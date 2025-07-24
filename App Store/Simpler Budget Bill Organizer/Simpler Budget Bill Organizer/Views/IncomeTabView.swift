@@ -12,6 +12,7 @@ struct IncomeTabView: View {
     
     @State private var editingIncome: Income? = nil
     @Binding var tabSelection: Int
+    @FocusState var isInputActive: Bool
     
     var body: some View {
         NavigationStack {
@@ -20,6 +21,19 @@ struct IncomeTabView: View {
                     TextField("Source (e.g. Job, Freelance)", text: $source)
                     TextField("Amount", text: $amount)
                         .keyboardType(.decimalPad)
+                        .focused($isInputActive)
+                        .toolbar {
+                            ToolbarItem(placement: .keyboard) {
+                                HStack {
+                                    Spacer()
+                                    
+                                    Button("Done") {
+                                        isInputActive = false
+                                    }
+                                }
+                                .padding(.trailing)
+                            }
+                        }
                     DatePicker("Date", selection: $date, displayedComponents: .date)
                     
                     Picker("Frequency", selection: $frequency) {
@@ -103,6 +117,7 @@ struct EditIncomeSheet: View {
     @Environment(\.modelContext) private var context
     
     @Bindable var income: Income
+    @FocusState var isInputActive: Bool
     
     var body: some View {
         NavigationStack {
@@ -110,6 +125,19 @@ struct EditIncomeSheet: View {
                 TextField("Source", text: $income.source)
                 TextField("Amount", value: $income.amount, format: .number)
                     .keyboardType(.decimalPad)
+                    .focused($isInputActive)
+                    .toolbar {
+                        ToolbarItem(placement: .keyboard) {
+                            HStack {
+                                Spacer()
+                                
+                                Button("Done") {
+                                    isInputActive = false
+                                }
+                            }
+                            .padding(.trailing)
+                        }
+                    }
                 DatePicker("Date", selection: $income.date, displayedComponents: .date)
                 Picker("Frequency", selection: Binding(
                     get: { Frequency(rawValue: income.frequencyRaw) ?? .variable },

@@ -16,7 +16,7 @@ struct ExpenseTrackerView: View {
     @State private var speechRecognizer = SpeechRecognizer()
     @State private var isRecording = false
     @State private var selectedTimeframe: Timeframe = .week
-    @State private var selectedCategoryFilter: ExpenseCategory? = nil
+    @State private var selectedCategoryFilter: Category? = nil //ExpenseCategory? = nil
     @State private var editingExpense: Expense? = nil
     @State private var isSubscribed = false
     
@@ -145,12 +145,12 @@ struct ExpenseTrackerView: View {
                     Label("Filter", systemImage: "line.3.horizontal.decrease.circle")
                     Spacer()
                     Picker("Category", selection: $selectedCategoryFilter) {
-                        Text("All").tag(ExpenseCategory?.none)
+                        Text("All").tag(Optional<Category>.none) //.tag(ExpenseCategory?.none)
                         ForEach(ExpenseCategory.allCases) { category in
                             Text(category.label).tag(ExpenseCategory?.some(category))
                         }
                     }
-                    .pickerStyle(.menu)
+                    .pickerStyle(.navigationLink)
                 }
                 .padding(.horizontal)
                 
@@ -330,13 +330,13 @@ struct ExpenseTrackerView: View {
             guard !alreadyExists else { continue }
 
             let vendor = transaction.description
-            let inferredCategory = inferCategory(from: vendor)
+//            let inferredCategory = inferCategory(from: vendor)
 
             let newExpense = Expense(
                 amount: abs(transaction.amount),
                 vendor: vendor,
                 date: transaction.date,
-                category: inferredCategory
+                category: nil //Category(name: "TEST", icon: "testtube.2") //inferredCategory
             )
             newExpense.id = transaction.id
             context.insert(newExpense)

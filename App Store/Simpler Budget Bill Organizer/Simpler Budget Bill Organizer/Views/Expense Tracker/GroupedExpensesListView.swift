@@ -18,7 +18,7 @@ struct GroupedExpensesListView: View {
                     .font(.headline)) {
                         
                         ForEach(expenses) { expense in
-                            HStack {
+                            HStack(alignment: .top) {
                                 if isSelecting {
                                     Image(systemName: selectedExpenses.contains(expense) ? "checkmark.circle.fill" : "circle")
                                         .onTapGesture {
@@ -26,10 +26,26 @@ struct GroupedExpensesListView: View {
                                         }
                                 }
                                 
+                                if let icon = expense.category?.icon {
+                                    iconView(for: icon)
+                                }
+                                
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(expense.vendor)
                                         .font(.headline)
+                                    
+                                    if let category = expense.category {
+                                        Text(category.name)
+                                            .font(.caption2)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
+                                
+                                Spacer()
+                                
+                                VStack(alignment: .trailing) {
                                     Text(expense.amount, format: .currency(code: "USD"))
+                                    
                                     Text(expense.date, style: .date)
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
@@ -68,6 +84,17 @@ struct GroupedExpensesListView: View {
             selectedExpenses.remove(expense)
         } else {
             selectedExpenses.insert(expense)
+        }
+    }
+    
+    @ViewBuilder
+    private func iconView(for icon: String) -> some View {
+        if UIImage(systemName: icon) != nil {
+            Image(systemName: icon)
+                .foregroundStyle(.accent)
+        } else {
+            Text(icon)
+                .font(.title3)
         }
     }
 }
