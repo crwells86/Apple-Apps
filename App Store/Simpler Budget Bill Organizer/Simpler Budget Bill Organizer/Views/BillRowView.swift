@@ -10,7 +10,7 @@ struct BillRowView: View {
 
         return HStack(alignment: .top) {
             if let icon = bill.category?.icon {
-                iconView(for: icon)
+                IconView(icon: icon)
             }
 
             VStack(alignment: .leading) {
@@ -81,27 +81,4 @@ struct BillRowView: View {
         default: return .indigo
         }
     }
-    
-    @ViewBuilder
-    private func iconView(for icon: String) -> some View {
-        if UIImage(systemName: icon) != nil {
-            Image(systemName: icon)
-                .foregroundStyle(.accent)
-        } else {
-            Text(icon)
-                .font(.title3)
-        }
-    }
 }
-
-
-//#Preview(traits: .sizeThatFitsLayout) {
-//    VStack(spacing: 16) {
-//        BillRowView(bill: Transaction.sample(dueInDays: 0))
-//        BillRowView(bill: Transaction.sample(dueInDays: 1))
-//        BillRowView(bill: Transaction.sample(dueInDays: 3))
-//        BillRowView(bill: Transaction.sample(dueInDays: 8))
-//        BillRowView(bill: Transaction.sample(dueInDays: 6, isPaid: true))
-//    }
-//    .padding()
-//}

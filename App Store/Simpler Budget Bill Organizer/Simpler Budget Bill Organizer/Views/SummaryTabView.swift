@@ -93,7 +93,6 @@ struct SummaryTabView: View {
                         ContentUnavailableView("No Spending Categories", systemImage: "chart.pie")
                     } else {
                         DoughnutChartView(data: spendingData)
-//                            .environment(budget)
                     }
                     
                     // MARK: - Income vs. Spending

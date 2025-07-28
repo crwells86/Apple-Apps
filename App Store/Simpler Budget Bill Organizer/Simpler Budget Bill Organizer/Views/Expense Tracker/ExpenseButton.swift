@@ -190,7 +190,7 @@ struct ManualEntryView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
     @Environment(BudgetController.self) private var budget: BudgetController
-
+    
     @State private var amount = ""
     @State private var vendor = ""
     @State private var date = Date() // Default to now
@@ -198,7 +198,7 @@ struct ManualEntryView: View {
     @Query(sort: \Category.name) private var categories: [Category]
     @State private var selectedCategory: Category? = nil
     @FocusState var isInputActive: Bool
-
+    
     var body: some View {
         NavigationView {
             Form {
@@ -217,11 +217,11 @@ struct ManualEntryView: View {
                             .padding(.trailing)
                         }
                     }
-
+                
                 TextField("Vendor", text: $vendor)
-
+                
                 DatePicker("Date", selection: $date, displayedComponents: [.date])
-
+                
                 // Category Picker
                 Picker(selection: $selectedCategory) {
                     Text("None").tag(Optional<Category>.none)
@@ -230,7 +230,7 @@ struct ManualEntryView: View {
                         Label {
                             Text(category.name)
                         } icon: {
-                            iconView(for: category.icon)
+                            IconView(icon: category.icon)
                         }
                         .tag(Optional(category))
                     }
@@ -239,7 +239,7 @@ struct ManualEntryView: View {
                         Label {
                             Text(selectedCategory.name)
                         } icon: {
-                            iconView(for: selectedCategory.icon)
+                            IconView(icon: selectedCategory.icon)
                         }
                     } else {
                         Text("Select Category")
@@ -257,29 +257,20 @@ struct ManualEntryView: View {
                             amount: decimalAmount,
                             vendor: vendor,
                             date: date, // Use selected date
-                            category: selectedCategory 
+                            category: selectedCategory
                         )
                         
                         budget.checkCategorySpending(categories)
                         onSave(expense)
                     }
                 }
-
+                
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         dismiss()
                     }
                 }
             }
-        }
-    }
-    
-    @ViewBuilder
-    func iconView(for icon: String) -> some View {
-        if UIImage(systemName: icon) != nil {
-            Image(systemName: icon)
-        } else {
-            Text(icon)
         }
     }
 }

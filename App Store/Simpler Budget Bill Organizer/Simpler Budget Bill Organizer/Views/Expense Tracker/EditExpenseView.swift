@@ -28,14 +28,9 @@ struct EditExpenseView: View {
                             .padding(.trailing)
                         }
                     }
+                
                 DatePicker("Date", selection: $expense.date, displayedComponents: .date)
                 
-//                Picker("Category", selection: $expense.category) {
-//                    ForEach(ExpenseCategory.allCases) { category in
-//                        Text(category.label)
-//                            .tag(category)
-//                    }
-//                }
                 // Category Picker
                 Picker(selection: $expense.category) {
                     Text("None").tag(Optional<Category>.none)
@@ -44,7 +39,7 @@ struct EditExpenseView: View {
                         Label {
                             Text(category.name)
                         } icon: {
-                            iconView(for: category.icon)
+                            IconView(icon: category.icon)
                         }
                         .tag(Optional(category))
                     }
@@ -53,14 +48,13 @@ struct EditExpenseView: View {
                         Label {
                             Text(selectedCategory.name)
                         } icon: {
-                            iconView(for: selectedCategory.icon)
+                            IconView(icon: selectedCategory.icon)
                         }
                     } else {
                         Text("Select Category")
                     }
                 }
                 .pickerStyle(.navigationLink)
-                
                 
                 Button("Add Category") {
                     showAddCategory = true
@@ -80,15 +74,6 @@ struct EditExpenseView: View {
                     }
                 }
             }
-        }
-    }
-    
-    @ViewBuilder
-    func iconView(for icon: String) -> some View {
-        if UIImage(systemName: icon) != nil {
-            Image(systemName: icon)
-        } else {
-            Text(icon)
         }
     }
 }

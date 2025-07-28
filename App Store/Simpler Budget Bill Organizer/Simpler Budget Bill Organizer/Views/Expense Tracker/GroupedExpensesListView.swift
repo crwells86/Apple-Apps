@@ -5,7 +5,6 @@ struct GroupedExpensesListView: View {
     let onDelete: (Expense) -> Void
     let onEdit: (Expense) -> Void
     
-    // New
     let isSelecting: Bool
     @Binding var selectedExpenses: Set<Expense>
     
@@ -27,7 +26,7 @@ struct GroupedExpensesListView: View {
                                 }
                                 
                                 if let icon = expense.category?.icon {
-                                    iconView(for: icon)
+                                    IconView(icon: icon)
                                 }
                                 
                                 VStack(alignment: .leading, spacing: 4) {
@@ -84,17 +83,6 @@ struct GroupedExpensesListView: View {
             selectedExpenses.remove(expense)
         } else {
             selectedExpenses.insert(expense)
-        }
-    }
-    
-    @ViewBuilder
-    private func iconView(for icon: String) -> some View {
-        if UIImage(systemName: icon) != nil {
-            Image(systemName: icon)
-                .foregroundStyle(.accent)
-        } else {
-            Text(icon)
-                .font(.title3)
         }
     }
 }

@@ -3,11 +3,11 @@ import SwiftUI
 struct WhatsNewSheet: ViewModifier {
     @AppStorage("lastSeenVersion") private var lastSeenVersion: String = ""
     @State private var isPresented: Bool = false
-    
+
     private var currentVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
     }
-    
+
     func body(content: Content) -> some View {
         content
             .onAppear {
@@ -38,21 +38,21 @@ struct WhatsNewItem: Identifiable {
 
 struct WhatsNewView: View {
     let version: String
-    
+
     private let features: [WhatsNewItem] = [
-        .init(icon: "bell.badge.fill",
-              title: "Category Limits",
-              subtitle: "Set spending caps and get notified when you go over."),
-        .init(icon: "slider.horizontal.3",
-              title: "Custom Categories",
-              subtitle: "Create your own categories to track expenses your way.")
 //        .init(icon: "checklist",
-//              title: "Bulk Assign Categories",
-//              subtitle: "Swiftly select and categorize multiple expenses or bills at once.")
+//              title: "Batch Category Editing",
+//              subtitle: "Select multiple expenses or bills and assign categories all at once."),
+        .init(icon: "ladybug.fill",
+              title: "Bug Fixes",
+              subtitle: "Refinements and polish to keep everything snappy and functional."),
+        .init(icon: "sparkles",
+              title: "UI Enhancements",
+              subtitle: "Small design tweaks for a smoother experience."),
     ]
-    
+
     @Environment(\.dismiss) private var dismiss
-    
+
     var body: some View {
         VStack(spacing: 24) {
             Text("What's New in \nversion \(version)")
@@ -60,7 +60,7 @@ struct WhatsNewView: View {
                 .fontWeight(.bold)
                 .multilineTextAlignment(.center)
                 .padding(.vertical)
-            
+
             VStack(alignment: .leading, spacing: 20) {
                 ForEach(features) { item in
                     HStack(alignment: .top, spacing: 16) {
@@ -68,7 +68,7 @@ struct WhatsNewView: View {
                             .foregroundColor(.accentColor)
                             .font(.title3)
                             .frame(width: 24)
-                        
+
                         VStack(alignment: .leading, spacing: 4) {
                             Text(item.title)
                                 .font(.headline)
@@ -80,9 +80,20 @@ struct WhatsNewView: View {
                 }
             }
             .padding()
-            
+
             Spacer()
             
+            Button {
+                if let url = URL(string: "https://apps.apple.com/app/id6745808332?action=write-review") {
+                    UIApplication.shared.open(url)
+                }
+            } label: {
+                Text("Rate on the App Store")
+                    .font(.footnote)
+                    .foregroundColor(.accentColor)
+                    .padding(.top, 8)
+            }
+
             Button {
                 dismiss()
             } label: {
@@ -94,7 +105,6 @@ struct WhatsNewView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                     .padding(.horizontal)
             }
-            
         }
         .padding()
         .background(Color.black.ignoresSafeArea())
@@ -102,5 +112,5 @@ struct WhatsNewView: View {
 }
 
 #Preview {
-    WhatsNewView(version: "0.2")
+    WhatsNewView(version: "0.5.1")
 }
