@@ -3,11 +3,11 @@ import SwiftUI
 struct WhatsNewSheet: ViewModifier {
     @AppStorage("lastSeenVersion") private var lastSeenVersion: String = ""
     @State private var isPresented: Bool = false
-
+    
     private var currentVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
     }
-
+    
     func body(content: Content) -> some View {
         content
             .onAppear {
@@ -38,21 +38,23 @@ struct WhatsNewItem: Identifiable {
 
 struct WhatsNewView: View {
     let version: String
-
+    
     private let features: [WhatsNewItem] = [
-//        .init(icon: "checklist",
-//              title: "Batch Category Editing",
-//              subtitle: "Select multiple expenses or bills and assign categories all at once."),
-        .init(icon: "ladybug.fill",
-              title: "Bug Fixes",
-              subtitle: "Refinements and polish to keep everything snappy and functional."),
-        .init(icon: "sparkles",
-              title: "UI Enhancements",
-              subtitle: "Small design tweaks for a smoother experience."),
+        .init(icon: "pencil.circle",
+              title: "Edit Categories",
+              subtitle: "Swipe on a category in the Manage Categories view to quickly edit it."),
+        
+        .init(icon: "plus.circle",
+              title: "Easily Create Categories",
+              subtitle: "Easily create new categories directly from the Spending by Category view."),
+        
+        .init(icon: "envelope",
+              title: "Send Feedback",
+              subtitle: "Tap the envelope button in the top of any view to email me directly with thoughts or suggestions.")
     ]
-
+    
     @Environment(\.dismiss) private var dismiss
-
+    
     var body: some View {
         VStack(spacing: 24) {
             Text("What's New in \nversion \(version)")
@@ -60,7 +62,7 @@ struct WhatsNewView: View {
                 .fontWeight(.bold)
                 .multilineTextAlignment(.center)
                 .padding(.vertical)
-
+            
             VStack(alignment: .leading, spacing: 20) {
                 ForEach(features) { item in
                     HStack(alignment: .top, spacing: 16) {
@@ -68,7 +70,7 @@ struct WhatsNewView: View {
                             .foregroundColor(.accentColor)
                             .font(.title3)
                             .frame(width: 24)
-
+                        
                         VStack(alignment: .leading, spacing: 4) {
                             Text(item.title)
                                 .font(.headline)
@@ -80,7 +82,7 @@ struct WhatsNewView: View {
                 }
             }
             .padding()
-
+            
             Spacer()
             
             Button {
@@ -93,7 +95,7 @@ struct WhatsNewView: View {
                     .foregroundColor(.accentColor)
                     .padding(.top, 8)
             }
-
+            
             Button {
                 dismiss()
             } label: {

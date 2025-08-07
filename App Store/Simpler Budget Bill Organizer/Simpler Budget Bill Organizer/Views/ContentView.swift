@@ -77,6 +77,15 @@ struct ContentView: View {
                     }
                 }
                 .navigationTitle(tabSelection == 1 && subscriptionController.isSubscribed ? "\(Date().formatted(.dateTime.month(.wide))) overview" : "")
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button {
+                            sendFeedbackEmail()
+                        } label: {
+                            Label("Send Feedback", systemImage: "envelope")
+                        }
+                    }
+                }
                 .onAppear {
                     tabSelection = subscriptionController.isSubscribed ? 1: 2
                     sessionCount += 1
@@ -105,6 +114,18 @@ struct ContentView: View {
             .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
             AppStore.requestReview(in: scene)
             hasRequestedReview.toggle()
+        }
+    }
+    
+    func sendFeedbackEmail() {
+        let subject = "App Feedback – Simpler Budget"
+        let body = "Share some feedback..."
+        let email = "calebrwells@gmail.com"
+        
+        let emailURL = URL(string: "mailto:\(email)?subject=\(subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")&body=\(body.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")")
+
+        if let url = emailURL {
+            UIApplication.shared.open(url)
         }
     }
     

@@ -168,8 +168,6 @@ struct BillsListView: View {
         
         do {
             try context.save()
-            // Optionally update BudgetController state if needed
-            // e.g., budget.updateTotals() or similar
         } catch {
             print("Failed to save expense: \(error)")
         }

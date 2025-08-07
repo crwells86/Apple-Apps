@@ -25,7 +25,3 @@ struct OnboardingPage: View {
         .padding()
     }
 }
-
-#Preview(traits: .sizeThatFitsLayout) {
-    OnboardingPage(image: "chart.line.uptrend.xyaxis", title: "Know What You Need", description: "Add your bills once and instantly see how much you need to earn annually, monthly, weekly, or hourly.")
-}

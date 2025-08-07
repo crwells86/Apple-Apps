@@ -61,30 +61,6 @@ struct SummaryTabView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 32) {
-                    //                    AppleCardAccountView()
-                    
-                    // MARK: - Budget Summary
-                    //                    SectionHeader(title: "Budget Summary", systemImage: "wallet.pass")
-                    //                    
-                    //                    HStack(spacing: 16) {
-                    //                        ValueCard(
-                    //                            title: "Left to Spend",
-                    //                            value: budget.remainingBudget(
-                    //                                bills: bills,
-                    //                                expenses: expenses + paidBillsAsExpenses,
-                    //                                incomes: incomes,
-                    //                                for: .monthly
-                    //                            ).formatted(.currency(code: "USD"))
-                    //                        )
-                    //                        
-                    //                        InfoTile(
-                    //                            title: "Planned Budget",
-                    //                            value: budget.totalBills(bills, for: .monthly).formatted(.currency(code: "USD"))
-                    //                        )
-                    //                    }
-                    //                    .padding(.horizontal)
-                    
-                    
                     SectionHeader(title: "Spending By Category", systemImage: "chart.pie")
                     
                     let spendingData = spendingByCategory(from: categories)
@@ -139,91 +115,11 @@ struct SummaryTabView: View {
                         }
                     }
                     .padding(.horizontal)
-                    
-                    // MARK: - Export
-                    //                    HStack {
-                    //                        Spacer()
-                    //                        Button(action: exportPDF) {
-                    //                            Label("Export as PDF", systemImage: "square.and.arrow.up")
-                    //                                .font(.headline)
-                    //                                .padding()
-                    //                                .background(Color.accentColor.opacity(0.1))
-                    //                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                    //                        }
-                    //                        Spacer()
-                    //                    }
-                    //                    .padding(.top)
                 }
                 .padding(.vertical)
             }
         }
     }
-    
-    //    private func exportPDF() {
-    //        let pageSize = CGSize(width: 612, height: 792) // US Letter
-    //        let format = UIGraphicsPDFRendererFormat()
-    //        let renderer = UIGraphicsPDFRenderer(bounds: CGRect(origin: .zero, size: pageSize), format: format)
-    //        
-    //        let data = renderer.pdfData { context in
-    //            context.beginPage()
-    //            var yOffset: CGFloat = 40
-    //            
-    //            func drawText(_ text: String, font: UIFont = .systemFont(ofSize: 14), yOffset: inout CGFloat, spacing: CGFloat = 8, bold: Bool = false) {
-    //                let paragraphStyle = NSMutableParagraphStyle()
-    //                paragraphStyle.lineBreakMode = .byWordWrapping
-    //                
-    //                let attributes: [NSAttributedString.Key: Any] = [
-    //                    .font: bold ? UIFont.boldSystemFont(ofSize: font.pointSize) : font,
-    //                    .paragraphStyle: paragraphStyle
-    //                ]
-    //                
-    //                let attributedString = NSAttributedString(string: text, attributes: attributes)
-    //                let rect = CGRect(x: 40, y: yOffset, width: pageSize.width - 80, height: .greatestFiniteMagnitude)
-    //                let size = attributedString.boundingRect(with: rect.size, options: [.usesLineFragmentOrigin], context: nil)
-    //                
-    //                attributedString.draw(in: CGRect(origin: CGPoint(x: 40, y: yOffset), size: size.size))
-    //                yOffset += size.height + spacing
-    //            }
-    //            
-    //            // MARK: — Summary Header
-    //            drawText("📄 Monthly Budget Summary", font: .boldSystemFont(ofSize: 20), yOffset: &yOffset, spacing: 20)
-    //            
-    //            drawText("Total Income: \(budget.totalIncome(incomes).formatted(.currency(code: "USD")))", yOffset: &yOffset)
-    //            drawText("Total Expenses: \(budget.totalExpenses(expenses: expenses, paidBills: paidBills).formatted(.currency(code: "USD")))", yOffset: &yOffset)
-    //            drawText("Remaining: \(budget.remainingBudget(bills: bills, expenses: expenses + paidBillsAsExpenses, incomes: incomes, for: .monthly).formatted(.currency(code: "USD")))", yOffset: &yOffset)
-    //            drawText("Upcoming Bills: \(budget.upcomingPayments(bills: bills).count)", yOffset: &yOffset)
-    //            drawText("Paid Bills: \(paidBills.count)", yOffset: &yOffset)
-    //            drawText("Spent %: \(Int(budget.spendingProgress(bills: bills, expenses: expenses, incomes: incomes, for: .monthly) * 100))%", yOffset: &yOffset, spacing: 20)
-    //            
-    //            // MARK: — Income
-    //            drawText("💰 Income", font: .boldSystemFont(ofSize: 16), yOffset: &yOffset)
-    //            for income in incomes {
-    //                drawText("- \(income.date.formatted(date: .abbreviated, time: .omitted)) | \(income.amount.formatted(.currency(code: "USD")))", yOffset: &yOffset)
-    //            }
-    //            
-    //            // MARK: — Expenses
-    //            drawText("💸 Expenses", font: .boldSystemFont(ofSize: 16), yOffset: &yOffset, spacing: 12)
-    //            for expense in expenses {
-    //                drawText("- \(expense.date.formatted(date: .abbreviated, time: .omitted)) | \(expense.vendor) | \(expense.amount.formatted(.currency(code: "USD")))", yOffset: &yOffset)
-    //            }
-    //            
-    //            // MARK: — Paid Bills
-    //            drawText("📬 Paid Bills", font: .boldSystemFont(ofSize: 16), yOffset: &yOffset, spacing: 12)
-    //            for bill in paidBills {
-    //                guard let due = bill.dueDate else { continue }
-    //                drawText("- \(due.formatted(date: .abbreviated, time: .omitted)) | \(bill.name) | \(Decimal(bill.amount).formatted(.currency(code: bill.currencyCode)))", yOffset: &yOffset)
-    //            }
-    //        }
-    //        
-    //        let url = FileManager.default.temporaryDirectory.appendingPathComponent("BudgetSummary.pdf")
-    //        do {
-    //            try data.write(to: url)
-    //            sharePDF(at: url)
-    //        } catch {
-    //            print("Failed to save PDF:", error.localizedDescription)
-    //        }
-    //    }
-    
     
     private func sharePDF(at url: URL) {
         guard let root = UIApplication.shared.connectedScenes

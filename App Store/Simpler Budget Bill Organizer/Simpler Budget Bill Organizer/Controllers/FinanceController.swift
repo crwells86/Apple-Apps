@@ -4,7 +4,6 @@ import FinanceKit
 struct FinanceController {
     
     // MARK: - Weekly Spending Total
-    
     static func calculateWeeklySpendingTotal() async throws -> Decimal {
         let accounts = try await FinanceStore.shared.accounts(query: AccountQuery())
         var total: Decimal = 0
@@ -76,7 +75,6 @@ struct FinanceController {
     }
     
     // MARK: - Fetch Transactions
-    
     static func fetchLastWeekOfTransactions() async throws -> [FinanceKit.Transaction] {
         let startOfWeek = Date.startOfWeek
         

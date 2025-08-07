@@ -155,7 +155,6 @@ import UserNotifications
     /// Schedule local notifications for bills with `remindMe == true`.
     func scheduleReminders(for bills: [Transaction]) {
         let center = UNUserNotificationCenter.current()
-//        center.requestAuthorization(options: [.alert, .sound, .badge]) { _, _ in }
         
         for bill in bills where bill.remindMe {
             guard
@@ -185,14 +184,12 @@ import UserNotifications
     
     func checkCategorySpending(_ categories: [Category]) {
         for category in categories where category.enableReminders {
-            //
-//            print(category.limit)
             guard let limit = category.limit else { continue }
             let totalSpent = spending(for: category)
-
+            
             let percentUsed = (NSDecimalNumber(decimal: totalSpent).doubleValue /
                                NSDecimalNumber(decimal: limit).doubleValue)
-
+            
             if percentUsed >= 1.0 {
                 scheduleNotification(
                     title: "\(category.name) Budget Exceeded",
@@ -215,19 +212,14 @@ import UserNotifications
     
     func scheduleNotification(title: String, body: String) {
         let center = UNUserNotificationCenter.current()
-//        center.requestAuthorization(options: [.alert, .sound, .badge]) { _, _ in }
-//        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
-
-
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
         content.sound = .default
-
+        
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-
-//        center.add(request)
+        
         center.add(request) { error in
             if let error = error {
                 print("Error scheduling notification: \(error.localizedDescription)")

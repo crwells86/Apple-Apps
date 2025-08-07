@@ -20,6 +20,9 @@ struct AddCategorySheet: View {
     @State private var enableReminders: Bool = false
     @FocusState var isInputActive: Bool
     
+    @State private var editingCategory: Category?
+    @State private var isEditingCategory: Bool = false
+    
     var onAdd: (Category) -> Void
     
     private let iconOptions: [String] = [
@@ -38,30 +41,63 @@ struct AddCategorySheet: View {
                 
                 switch categoryMode {
                 case .select:
-                    addCategoryForm
+                    categoryForm
                 case .manage:
                     manageCategoriesList
                 }
             }
             .padding(.top)
-            .navigationTitle(categoryMode == .select ? "New Category" : "Manage Categories")
+            .navigationTitle(categoryMode == .select ? "\(isEditingCategory ? "Edit" : "New") Category" : "Manage Categories")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel", action: dismiss.callAsFunction)
                 }
+                
                 if categoryMode == .select {
                     ToolbarItem(placement: .confirmationAction) {
-                        Button("Add", action: addCategory)
-                            .disabled(name.isEmpty || selectedIcon.isEmpty)
+                        Button(isEditingCategory ? "Save" : "Add", action: {
+                            if isEditingCategory {
+                                updateCategory()
+                            } else {
+                                addCategory()
+                            }
+                        })
+                        .disabled(name.isEmpty || selectedIcon.isEmpty)
                     }
                 }
+                
             }
         }
     }
     
-    // MARK: - Add Mode View
+    private func updateCategory() {
+        guard let category = editingCategory else { return }
+        
+        category.name = name
+        category.icon = selectedIcon
+        category.limit = limit
+        category.enableReminders = enableReminders
+        
+        try? modelContext.save()
+        
+        // Reset
+        resetForm()
+    }
     
-    private var addCategoryForm: some View {
+    private func resetForm() {
+        name = ""
+        selectedIcon = ""
+        limit = nil
+        enableReminders = false
+        editingCategory = nil
+        isEditingCategory = false
+        categoryMode = .manage
+    }
+    
+    
+    
+    // MARK: - Add Mode View
+    private var categoryForm: some View {
         Group {
             Section {
                 TextField("Category Name", text: $name)
@@ -75,7 +111,6 @@ struct AddCategorySheet: View {
                         ToolbarItem(placement: .keyboard) {
                             HStack {
                                 Spacer()
-                                
                                 Button("Done") {
                                     isInputActive = false
                                 }
@@ -143,18 +178,44 @@ struct AddCategorySheet: View {
                     }
                     Spacer()
                 }
+                .swipeActions(edge: .trailing) {
+                    Button(role: .destructive) {
+                        if let index = categories.firstIndex(of: category) {
+                            deleteCategory(at: IndexSet(integer: index))
+                        }
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                    
+                    Button {
+                        startEditing(category)
+                    } label: {
+                        Label("Edit", systemImage: "pencil")
+                    }
+                    .tint(.green)
+                }
             }
-            .onDelete(perform: deleteCategory)
         }
     }
     
-    // MARK: - Helpers
+    private func startEditing(_ category: Category) {
+        editingCategory = category
+        name = category.name
+        selectedIcon = category.icon
+        limit = category.limit
+        enableReminders = category.enableReminders
+        categoryMode = .select
+        isEditingCategory = true
+    }
+    
     private func addCategory() {
         let newCategory = Category(name: name, icon: selectedIcon, limit: limit)
         newCategory.isDefault = false
         newCategory.enableReminders = enableReminders
         modelContext.insert(newCategory)
         onAdd(newCategory)
+        
+        resetForm()
     }
     
     private func deleteCategory(at offsets: IndexSet) {
