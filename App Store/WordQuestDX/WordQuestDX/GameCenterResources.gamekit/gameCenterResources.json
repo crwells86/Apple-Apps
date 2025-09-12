@@ -1,0 +1,508 @@
+{
+  "meta" : {
+    "version" : "2024-11-15"
+  },
+  "resources" : {
+    "achievementImages" : {
+      "puzzles_1-en-US" : [
+        {
+          "localID" : "puzzles_1-en-US",
+          "url" : "en-US\/AchievementImage-puzzles_1-en-US.png"
+        }
+      ],
+      "puzzles_10-en-US" : [
+        {
+          "localID" : "puzzles_10-en-US",
+          "url" : "en-US\/AchievementImage-puzzles_10-en-US.png"
+        }
+      ],
+      "puzzles_25-en-US" : [
+        {
+          "localID" : "puzzles_25-en-US",
+          "url" : "en-US\/AchievementImage-puzzles_25-en-US.png"
+        }
+      ],
+      "puzzles_50-en-US" : [
+        {
+          "localID" : "puzzles_50-en-US",
+          "url" : "en-US\/AchievementImage-puzzles_50-en-US.png"
+        }
+      ],
+      "puzzles_100-en-US" : [
+        {
+          "localID" : "puzzles_100-en-US",
+          "url" : "en-US\/AchievementImage-puzzles_100-en-US.png"
+        }
+      ],
+      "skill_fast_5words-en-US" : [
+        {
+          "localID" : "skill_fast_5words-en-US",
+          "url" : "en-US\/AchievementImage-skill_fast_5words-en-US.png"
+        }
+      ],
+      "skill_fast_word-en-US" : [
+        {
+          "localID" : "skill_fast_word-en-US",
+          "url" : "en-US\/AchievementImage-skill_fast_word-en-US.png"
+        }
+      ],
+      "skill_long_word-en-US" : [
+        {
+          "localID" : "skill_long_word-en-US",
+          "url" : "en-US\/AchievementImage-skill_long_word-en-US.png"
+        }
+      ],
+      "skill_no_hints-en-US" : [
+        {
+          "localID" : "skill_no_hints-en-US",
+          "url" : "en-US\/AchievementImage-skill_no_hints-en-US.png"
+        }
+      ],
+      "streak_daily_7-en-US" : [
+        {
+          "localID" : "streak_daily_7-en-US",
+          "url" : "en-US\/AchievementImage-streak_daily_7-en-US.png"
+        }
+      ],
+      "streak_daily_30-en-US" : [
+        {
+          "localID" : "streak_daily_30-en-US",
+          "url" : "en-US\/AchievementImage-streak_daily_30-en-US.png"
+        }
+      ],
+      "word_1-en-US" : [
+        {
+          "localID" : "word_1-en-US",
+          "url" : "en-US\/AchievementImage-word_1-en-US.png"
+        }
+      ],
+      "words_25-en-US" : [
+        {
+          "localID" : "words_25-en-US",
+          "url" : "en-US\/AchievementImage-words_25-en-US.png"
+        }
+      ],
+      "words_100-en-US" : [
+        {
+          "localID" : "words_100-en-US",
+          "url" : "en-US\/AchievementImage-words_100-en-US.png"
+        }
+      ],
+      "words_500-en-US" : [
+        {
+          "localID" : "words_500-en-US",
+          "url" : "en-US\/AchievementImage-words_500-en-US.png"
+        }
+      ],
+      "words_1000-en-US" : [
+        {
+          "localID" : "words_1000-en-US",
+          "url" : "en-US\/AchievementImage-words_1000-en-US.png"
+        }
+      ]
+    },
+    "achievementLocalizations" : {
+      "puzzles_1" : [
+        {
+          "afterEarnedDescription" : "Your first puzzle is complete!",
+          "beforeEarnedDescription" : "Solve your first puzzle.",
+          "locale" : "en-US",
+          "localID" : "puzzles_1-en-US",
+          "name" : "First Puzzle"
+        }
+      ],
+      "puzzles_10" : [
+        {
+          "afterEarnedDescription" : "10 puzzles completed!",
+          "beforeEarnedDescription" : "Solve 10 puzzles.",
+          "locale" : "en-US",
+          "localID" : "puzzles_10-en-US",
+          "name" : "Puzzle Apprentice"
+        }
+      ],
+      "puzzles_25" : [
+        {
+          "afterEarnedDescription" : "25 puzzles finished!",
+          "beforeEarnedDescription" : "Solve 25 puzzles.",
+          "locale" : "en-US",
+          "localID" : "puzzles_25-en-US",
+          "name" : "Puzzle Journeyman"
+        }
+      ],
+      "puzzles_50" : [
+        {
+          "afterEarnedDescription" : "50 puzzles mastered!",
+          "beforeEarnedDescription" : "Solve 50 puzzles.",
+          "locale" : "en-US",
+          "localID" : "puzzles_50-en-US",
+          "name" : "Puzzle Expert"
+        }
+      ],
+      "puzzles_100" : [
+        {
+          "afterEarnedDescription" : "100 puzzles solved — amazing!",
+          "beforeEarnedDescription" : "Solve 100 puzzles.",
+          "locale" : "en-US",
+          "localID" : "puzzles_100-en-US",
+          "name" : "Puzzle Champion"
+        }
+      ],
+      "skill_fast_5words" : [
+        {
+          "afterEarnedDescription" : "5 words found in under a minute!",
+          "beforeEarnedDescription" : "Find 5 words in under a minute.",
+          "locale" : "en-US",
+          "localID" : "skill_fast_5words-en-US",
+          "name" : "Lightning Search"
+        }
+      ],
+      "skill_fast_word" : [
+        {
+          "afterEarnedDescription" : "Found a word in under 5 seconds!",
+          "beforeEarnedDescription" : "Find a word in under 5 seconds.",
+          "locale" : "en-US",
+          "localID" : "skill_fast_word-en-US",
+          "name" : "Sharp Eye"
+        }
+      ],
+      "skill_long_word" : [
+        {
+          "afterEarnedDescription" : "You solved a long word (8+ letters)!",
+          "beforeEarnedDescription" : "Solve a word with 8+ letters.",
+          "locale" : "en-US",
+          "localID" : "skill_long_word-en-US",
+          "name" : "Long Word Master"
+        }
+      ],
+      "skill_no_hints" : [
+        {
+          "afterEarnedDescription" : "Completed a puzzle without hints!",
+          "beforeEarnedDescription" : "Solve a puzzle without using hints.",
+          "locale" : "en-US",
+          "localID" : "skill_no_hints-en-US",
+          "name" : "Marathon Finder"
+        }
+      ],
+      "streak_daily_7" : [
+        {
+          "afterEarnedDescription" : "Played 7 daily challenges in a row!",
+          "beforeEarnedDescription" : "Complete daily challenges 7 days in a row.",
+          "locale" : "en-US",
+          "localID" : "streak_daily_7-en-US",
+          "name" : "Daily Player"
+        }
+      ],
+      "streak_daily_30" : [
+        {
+          "afterEarnedDescription" : "30 daily challenges in a row!",
+          "beforeEarnedDescription" : "Complete daily challenges 30 days in a row.",
+          "locale" : "en-US",
+          "localID" : "streak_daily_30-en-US",
+          "name" : "Daily Grinder"
+        }
+      ],
+      "word_1" : [
+        {
+          "afterEarnedDescription" : "You found your very first word!",
+          "beforeEarnedDescription" : "Find your first word.",
+          "locale" : "en-US",
+          "localID" : "word_1-en-US",
+          "name" : "First Word"
+        }
+      ],
+      "words_25" : [
+        {
+          "afterEarnedDescription" : "You’ve uncovered 25 words!",
+          "beforeEarnedDescription" : "Find 25 words.",
+          "locale" : "en-US",
+          "localID" : "words_25-en-US",
+          "name" : "Word Hunter"
+        }
+      ],
+      "words_100" : [
+        {
+          "afterEarnedDescription" : "100 words discovered!",
+          "beforeEarnedDescription" : "Find 100 words.",
+          "locale" : "en-US",
+          "localID" : "words_100-en-US",
+          "name" : "Word Collector"
+        }
+      ],
+      "words_500" : [
+        {
+          "afterEarnedDescription" : "500 words solved — impressive!",
+          "beforeEarnedDescription" : "Find 500 words.",
+          "locale" : "en-US",
+          "localID" : "words_500-en-US",
+          "name" : "Word Master"
+        }
+      ],
+      "words_1000" : [
+        {
+          "afterEarnedDescription" : "You’re a legend with 1000 words!",
+          "beforeEarnedDescription" : "Find 1000 words.",
+          "locale" : "en-US",
+          "localID" : "words_1000-en-US",
+          "name" : "Word Legend"
+        }
+      ]
+    },
+    "achievements" : [
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 0,
+        "referenceName" : "First Word",
+        "repeatable" : false,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "word_1"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 0,
+        "referenceName" : "Word Hunter",
+        "repeatable" : false,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "words_25"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 0,
+        "referenceName" : "Word Collector",
+        "repeatable" : false,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "words_100"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 0,
+        "referenceName" : "Word Master",
+        "repeatable" : false,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "words_500"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 0,
+        "referenceName" : "Word Legend",
+        "repeatable" : false,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "words_1000"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 0,
+        "referenceName" : "First Puzzle Solved",
+        "repeatable" : false,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "puzzles_1"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 0,
+        "referenceName" : "Puzzle Apprentice",
+        "repeatable" : false,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "puzzles_10"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 0,
+        "referenceName" : "Puzzle Journeyman",
+        "repeatable" : false,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "puzzles_25"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 0,
+        "referenceName" : "Puzzle Expert",
+        "repeatable" : false,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "puzzles_50"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 0,
+        "referenceName" : "Puzzle Champion",
+        "repeatable" : false,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "puzzles_100"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 0,
+        "referenceName" : "Sharp Eye",
+        "repeatable" : true,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "skill_fast_word"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 0,
+        "referenceName" : "Lightning Search",
+        "repeatable" : true,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "skill_fast_5words"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 0,
+        "referenceName" : "Marathon Finder",
+        "repeatable" : true,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "skill_no_hints"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 0,
+        "referenceName" : "Long Word Master",
+        "repeatable" : true,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "skill_long_word"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 0,
+        "referenceName" : "Daily Player",
+        "repeatable" : false,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "streak_daily_7"
+      },
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "points" : 0,
+        "referenceName" : "Daily Grinder",
+        "repeatable" : false,
+        "showBeforeEarned" : true,
+        "vendorIdentifier" : "streak_daily_30"
+      }
+    ],
+    "challengeDefaultImages" : {
+      "WordQuestDXDailyChallenge" : {
+        "localID" : "WordQuestDXDailyChallenge",
+        "url" : "ChallengeImage-WordQuestDXDailyChallenge.png"
+      }
+    },
+    "challengeLeaderboardRelationships" : {
+      "WordQuestDXDailyChallenge" : [
+        {
+          "leaderboardLocalID" : "WordQuestDXDailyHighScore",
+          "localID" : "WordQuestDXDailyChallenge"
+        }
+      ]
+    },
+    "challengeLocalizations" : {
+      "WordQuestDXDailyChallenge" : [
+        {
+          "locale" : "en-US",
+          "localID" : "WordQuestDXDailyChallenge-en-US",
+          "name" : "Daily Challenge"
+        }
+      ]
+    },
+    "challenges" : [
+      {
+        "archived" : false,
+        "challengeType" : "LEADERBOARD",
+        "referenceName" : "Word Quest DX Daily Challenge",
+        "repeatable" : true,
+        "vendorIdentifier" : "WordQuestDXDailyChallenge"
+      }
+    ],
+    "leaderboardLocalizations" : {
+      "WordQuestDXDailyHighScore" : [
+        {
+          "formatterSuffix" : "",
+          "formatterSuffixSingular" : "",
+          "locale" : "en-US",
+          "localID" : "WordQuestDXDailyHighScore-en-US",
+          "name" : "Daily High Score"
+        }
+      ],
+      "WordQuestDXHighScore" : [
+        {
+          "formatterSuffix" : "",
+          "formatterSuffixSingular" : "",
+          "locale" : "en-US",
+          "localID" : "WordQuestDXHighScore-en-US",
+          "name" : "High Score"
+        }
+      ]
+    },
+    "leaderboards" : [
+      {
+        "archived" : false,
+        "defaultFormatter" : "INTEGER",
+        "referenceName" : "Word Quest DX High Score",
+        "scoreRangeEnd" : null,
+        "scoreRangeStart" : null,
+        "scoreSortType" : "DESC",
+        "submissionType" : "BEST_SCORE",
+        "vendorIdentifier" : "WordQuestDXHighScore",
+        "visibility" : "SHOW_FOR_ALL"
+      },
+      {
+        "archived" : false,
+        "defaultFormatter" : "INTEGER",
+        "recurrenceDuration" : "PT24H",
+        "recurrenceRule" : "FREQ=DAILY;INTERVAL=1",
+        "recurrenceStartDate" : "2025-08-23T23:20:27Z",
+        "referenceName" : "Word Quest DX Daily High Score",
+        "scoreRangeEnd" : null,
+        "scoreRangeStart" : null,
+        "scoreSortType" : "DESC",
+        "submissionType" : "BEST_SCORE",
+        "vendorIdentifier" : "WordQuestDXDailyHighScore",
+        "visibility" : "SHOW_FOR_ALL"
+      }
+    ]
+  }
+}

@@ -24,8 +24,22 @@ struct BillRowView: View {
 
             Spacer()
 
+//            VStack(alignment: .trailing) {
+//                Text(bill.amount, format: .currency(code: "USD"))
+//
+//                if bill.isPaid {
+//                    paidTag
+//                } else if let next = nextDueDate, let d = days {
+//                    dueTag(days: d, date: next)
+//                }
+//            }
             VStack(alignment: .trailing) {
-                Text(bill.amount, format: .currency(code: "USD"))
+                if let code = Locale.current.currency?.identifier {
+                    Text(bill.amount, format: .currency(code: code))
+                } else {
+                    // Fallback if for some reason currency is unavailable
+                    Text(bill.amount, format: .number)
+                }
 
                 if bill.isPaid {
                     paidTag
@@ -33,6 +47,7 @@ struct BillRowView: View {
                     dueTag(days: d, date: next)
                 }
             }
+
         }
     }
 

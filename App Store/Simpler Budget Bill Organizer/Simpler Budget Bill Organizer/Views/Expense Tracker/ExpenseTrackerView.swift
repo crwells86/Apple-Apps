@@ -168,6 +168,7 @@ struct ExpenseTrackerView: View {
                     selectedExpenses: $selectedExpenses
                 )
             }
+            .navigationTitle("Expenses")
             .padding(.top)
             .overlay(alignment: .bottomTrailing) {
                 ExpenseButton(
@@ -193,27 +194,34 @@ struct ExpenseTrackerView: View {
                     hasSeenReviewPrompt = true
                 }
             }
-        }
-        .toolbar {
-            if tabSelection == 2 {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    if isSelecting {
-                        Button("Delete") {
-                            deleteSelectedExpenses()
-                        }
-                        .disabled(selectedExpenses.isEmpty)
-                    } else {
-                        Button("Select") {
-                            isSelecting = true
+            .toolbar {
+                if tabSelection == 2 {
+    //                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    ToolbarItemGroup {
+                        if isSelecting {
+                            Button("Delete") {
+                                deleteSelectedExpenses()
+                            }
+                            .disabled(selectedExpenses.isEmpty)
+                        } else {
+                            Button("Select") {
+                                isSelecting = true
+                            }
+                            
+                            Button {
+                                sendFeedbackEmail()
+                            } label: {
+                                Label("Send Feedback", systemImage: "envelope")
+                            }
                         }
                     }
-                }
-                
-                if isSelecting {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button("Cancel") {
-                            isSelecting = false
-                            selectedExpenses.removeAll()
+                    
+                    if isSelecting {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            Button("Cancel") {
+                                isSelecting = false
+                                selectedExpenses.removeAll()
+                            }
                         }
                     }
                 }
@@ -240,6 +248,18 @@ struct ExpenseTrackerView: View {
     
     private func persistDeletedTransactionIDs() {
         deletedTransactionIDsData = (try? JSONEncoder().encode(deletedTransactionIDs)) ?? Data()
+    }
+    
+    func sendFeedbackEmail() {
+        let subject = "App Feedback – Simpler Budget"
+        let body = "Share some feedback..."
+        let email = "calebrwells@gmail.com"
+        
+        let emailURL = URL(string: "mailto:\(email)?subject=\(subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")&body=\(body.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")")
+
+        if let url = emailURL {
+            UIApplication.shared.open(url)
+        }
     }
     
     private func deleteSelectedExpenses() {

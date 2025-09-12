@@ -78,14 +78,32 @@ struct IncomeTabView: View {
             .navigationTitle("Income")
             .toolbar {
                 if tabSelection == 4 {
-                    ToolbarItem(placement: .primaryAction) {
+                    ToolbarItemGroup {
                         EditButton()
+                        
+                        Button {
+                            sendFeedbackEmail()
+                        } label: {
+                            Label("Send Feedback", systemImage: "envelope")
+                        }
                     }
                 }
             }
             .sheet(item: $editingIncome) { income in
                 EditIncomeSheet(income: income)
             }
+        }
+    }
+    
+    func sendFeedbackEmail() {
+        let subject = "App Feedback – Simpler Budget"
+        let body = "Share some feedback..."
+        let email = "calebrwells@gmail.com"
+        
+        let emailURL = URL(string: "mailto:\(email)?subject=\(subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")&body=\(body.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")")
+
+        if let url = emailURL {
+            UIApplication.shared.open(url)
         }
     }
     

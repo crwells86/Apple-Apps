@@ -13,7 +13,8 @@ struct EditExpenseView: View {
         NavigationStack {
             Form {
                 TextField("Vendor", text: $expense.vendor)
-                TextField("Amount", value: $expense.amount, format: .currency(code: "USD"))
+                TextField("Amount", value: $expense.amount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                          // format: .currency(code: "USD"))
                     .keyboardType(.decimalPad)
                     .focused($isInputActive)
                     .toolbar {

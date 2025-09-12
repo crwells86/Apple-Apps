@@ -13,7 +13,8 @@ struct GroupedExpensesListView: View {
             ForEach(groupedExpenses, id: \.key) { month, expenses in
                 let totalForMonth = expenses.reduce(Decimal(0)) { $0 + $1.amount }
                 
-                Section(header: Text("\(month) – \(totalForMonth, format: .currency(code: "USD"))")
+                Section(header: Text("\(month) – \(totalForMonth, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))")
+                        // format: .currency(code: "USD"))")
                     .font(.headline)) {
                         
                         ForEach(expenses) { expense in
@@ -43,7 +44,8 @@ struct GroupedExpensesListView: View {
                                 Spacer()
                                 
                                 VStack(alignment: .trailing) {
-                                    Text(expense.amount, format: .currency(code: "USD"))
+                                    Text(expense.amount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                                         // format: .currency(code: "USD"))
                                     
                                     Text(expense.date, style: .date)
                                         .font(.caption)

@@ -78,7 +78,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1630;
-				LastUpgradeCheck = 1630;
+				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					0049E72D2DD30E2500E9E64F = {
 						CreatedOnToolsVersion = 16.3;
@@ -184,6 +184,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -241,6 +242,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -258,7 +260,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Simpler-Budget-Bill-Organizer-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Simpler Budget";
+				INFOPLIST_KEY_CFBundleDisplayName = "Bill Organizer";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Simpler Budget Bill Organizer uses the microphone to capture your voice when logging expenses by speech. For example, you can say “Paid rent yesterday” instead of typing.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Simpler Budget Bill Organizer uses speech recognition to let you log expenses by speaking naturally, like “Spent five dollars on coffee.” Your voice is processed entirely on your device.";
@@ -272,7 +274,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.5.2;
+				MARKETING_VERSION = 0.5.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.calebrwells.BillOrganizer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -297,7 +299,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Simpler-Budget-Bill-Organizer-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Simpler Budget";
+				INFOPLIST_KEY_CFBundleDisplayName = "Bill Organizer";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Simpler Budget Bill Organizer uses the microphone to capture your voice when logging expenses by speech. For example, you can say “Paid rent yesterday” instead of typing.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Simpler Budget Bill Organizer uses speech recognition to let you log expenses by speaking naturally, like “Spent five dollars on coffee.” Your voice is processed entirely on your device.";
@@ -311,7 +313,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.5.2;
+				MARKETING_VERSION = 0.5.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.calebrwells.BillOrganizer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

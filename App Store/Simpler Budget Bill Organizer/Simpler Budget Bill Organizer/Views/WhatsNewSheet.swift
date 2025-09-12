@@ -40,17 +40,23 @@ struct WhatsNewView: View {
     let version: String
     
     private let features: [WhatsNewItem] = [
-        .init(icon: "pencil.circle",
-              title: "Edit Categories",
-              subtitle: "Swipe on a category in the Manage Categories view to quickly edit it."),
+        .init(
+            icon: "textformat",
+            title: "New App Name",
+            subtitle: "I have updated the app’s name to avoid confusion with another app that had a similar name and developer first name."
+        ),
         
-        .init(icon: "plus.circle",
-              title: "Easily Create Categories",
-              subtitle: "Easily create new categories directly from the Spending by Category view."),
+        .init(
+            icon: "wrench.and.screwdriver",
+            title: "Improvements",
+            subtitle: "Minor fixes and performance enhancements for a smoother experience."
+        ),
         
-        .init(icon: "envelope",
-              title: "Send Feedback",
-              subtitle: "Tap the envelope button in the top of any view to email me directly with thoughts or suggestions.")
+        .init(
+            icon: "creditcard",
+            title: "Apple Card & Apple Cash Only",
+            subtitle: "Automatic imports are available exclusively for Apple Card and Apple Cash, services provided by Apple and not available in all countries or regions. No other credit cards, debit cards, or bank accounts can be connected."
+        )
     ]
     
     @Environment(\.dismiss) private var dismiss

@@ -126,12 +126,31 @@ struct BillsListView: View {
                         } label: {
                             Image(systemName: "plus.circle")
                         }
+                        
+                        Button {
+                            sendFeedbackEmail()
+                        } label: {
+                            Label("Send Feedback", systemImage: "envelope")
+                        }
                     }
                 }
             }
             .onAppear {
                 budget.scheduleReminders(for: bills)
             }
+        }
+    }
+    
+    
+    func sendFeedbackEmail() {
+        let subject = "App Feedback – Simpler Budget"
+        let body = "Share some feedback..."
+        let email = "calebrwells@gmail.com"
+        
+        let emailURL = URL(string: "mailto:\(email)?subject=\(subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")&body=\(body.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")")
+
+        if let url = emailURL {
+            UIApplication.shared.open(url)
         }
     }
     

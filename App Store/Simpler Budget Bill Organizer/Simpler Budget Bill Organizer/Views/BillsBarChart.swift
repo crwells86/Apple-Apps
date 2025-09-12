@@ -11,7 +11,8 @@ struct BillsBarChart: View {
                 y: .value("Amount", segment.value)
             )
             .annotation(position: .top) {
-                Text(segment.value, format: .currency(code: "USD"))
+                Text(segment.value, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                     // format: .currency(code: "USD"))
                     .font(.caption)
             }
         }

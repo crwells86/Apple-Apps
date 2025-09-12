@@ -14,7 +14,7 @@ struct PaywallView: View {
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
                 
-                Text("Get the most out of Simpler Budget and take full control of your money.")
+                Text("Get the most out of your budget and take full control of your money.")
                     .font(.body)
                     .multilineTextAlignment(.center)
                     .foregroundColor(.secondary)
@@ -22,10 +22,10 @@ struct PaywallView: View {
                 
                 // MARK: - Feature List
                 VStack(alignment: .leading, spacing: 16) {
-                    PaywallFeature(symbol: "creditcard.fill", text: "Auto-import Apple Card & Apple Cash expenses")
-                    PaywallFeature(symbol: "chart.bar.xaxis", text: "Access the Summary tab")
+                    PaywallFeature(symbol: "chart.bar.xaxis", text: "Access the Summary & Income tabs")
                     PaywallFeature(symbol: "mic.fill", text: "Voice-to-Expense entry")
-                    PaywallFeature(symbol: "dollarsign.circle", text: "Track income and auto-budget")
+                    PaywallFeature(symbol: "creditcard.fill", text: "Auto-import Apple Card & Apple Cash expenses")
+                    //                    PaywallFeature(symbol: "dollarsign.circle", text: "Track income and auto-budget")
                     //                    PaywallFeature(symbol: "arrow.up.doc.fill", text: "Export reports to PDF")
                     PaywallFeature(symbol: "lock.shield", text: "Private & offline – no accounts, no ads")
                 }

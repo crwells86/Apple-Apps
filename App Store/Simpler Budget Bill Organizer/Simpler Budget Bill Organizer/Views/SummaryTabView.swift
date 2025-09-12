@@ -118,6 +118,28 @@ struct SummaryTabView: View {
                 }
                 .padding(.vertical)
             }
+            .navigationTitle("Summary")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        sendFeedbackEmail()
+                    } label: {
+                        Label("Send Feedback", systemImage: "envelope")
+                    }
+                }
+            }
+        }
+    }
+    
+    func sendFeedbackEmail() {
+        let subject = "App Feedback – Simpler Budget"
+        let body = "Share some feedback..."
+        let email = "calebrwells@gmail.com"
+        
+        let emailURL = URL(string: "mailto:\(email)?subject=\(subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")&body=\(body.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")")
+
+        if let url = emailURL {
+            UIApplication.shared.open(url)
         }
     }
     
@@ -130,181 +152,6 @@ struct SummaryTabView: View {
         
         let vc = UIActivityViewController(activityItems: [url], applicationActivities: nil)
         root.present(vc, animated: true)
-    }
-}
-
-private struct SectionHeader: View {
-    let title: String
-    let systemImage: String
-    
-    var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: systemImage)
-                .font(.headline)
-            Text(title)
-                .font(.title2.bold())
-            Spacer()
-        }
-        .padding(.horizontal)
-    }
-}
-
-
-
-
-import SwiftUI
-
-struct MonthOverviewView: View {
-    let remaining: Decimal
-    let budgeted: Decimal
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(remaining, format: .currency(code: "USD"))
-                .font(.system(size: 42, weight: .bold))
-            
-            Text("Out of \(budgeted, format: .currency(code: "USD")) budgeted")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal)
-    }
-}
-
-import SwiftUI
-
-struct CashFlowSectionView: View {
-    let income: Decimal
-    let expense: Decimal
-    let incomeChartData: [Double]
-    let expenseChartData: [Double]
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            //                NavigationLink {
-            //                    IncomeDetailView()
-            //                } label: {
-            MetricCardView(
-                title: "Income",
-                value: income,
-                color: .green,
-                chartData: incomeChartData
-            )
-            //                }
-            //                .buttonStyle(.plain)
-            
-            //                NavigationLink {
-            //                    ExpenseDetailView()
-            //                } label: {
-            MetricCardView(
-                title: "Expenses",
-                value: expense,
-                color: .red,
-                chartData: expenseChartData
-            )
-            //                }
-            //                .buttonStyle(.plain)
-        }
-        .padding(.horizontal)
-        //        }
-    }
-}
-
-struct MetricCardView: View {
-    let title: String
-    let value: Decimal
-    let color: Color
-    let chartData: [Double]
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text(title)
-                    .font(.headline)
-                Spacer()
-                //                Image(systemName: "chevron.right")
-                //                    .font(.caption)
-                //                    .foregroundColor(.secondary)
-            }
-            
-            Text(value, format: .currency(code: "USD"))
-                .font(.system(size: 28, weight: .bold))
-                .foregroundColor(color)
-            
-            BarChart(data: chartData, color: color)
-        }
-        .padding()
-        .background(RoundedRectangle(cornerRadius: 12)
-            .fill(Color(.secondarySystemBackground)))
-    }
-}
-
-
-
-enum CashFlowType {
-    case income
-    case expense
-}
-
-
-import Charts
-import SwiftUI
-
-struct BarChart: View {
-    let data: [Double]
-    let color: Color
-    
-    struct DailyEntry: Identifiable {
-        let date: Date
-        let value: Double
-        
-        var id: Date { date }
-        
-        var label: String {
-            let day = Calendar.current.component(.day, from: date)
-            return day == 1 || day % 5 == 0 ? "\(day)" : ""
-        }
-    }
-    
-    var entries: [DailyEntry] {
-        let calendar = Calendar.current
-        let now = Date()
-        let range = calendar.range(of: .day, in: .month, for: now)!
-        let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: now))!
-        
-        return range.enumerated().compactMap { index, _ in
-            guard index < data.count else { return nil }
-            let date = calendar.date(byAdding: .day, value: index, to: startOfMonth)!
-            return DailyEntry(date: date, value: data[index])
-        }
-    }
-    
-    var body: some View {
-        Chart {
-            ForEach(entries) { item in
-                BarMark(
-                    x: .value("Day", item.date),
-                    y: .value("Value", item.value)
-                )
-                .foregroundStyle(color.opacity(0.8))
-                .cornerRadius(2)
-            }
-        }
-        .frame(height: 100)
-        .chartYAxis(.hidden)
-        .chartXAxis {
-            AxisMarks(values: .stride(by: .day, count: 5)) { value in
-                AxisGridLine()
-                AxisTick()
-                AxisValueLabel {
-                    if let date = value.as(Date.self) {
-                        let day = Calendar.current.component(.day, from: date)
-                        Text("\(day)")
-                    }
-                }
-            }
-        }
     }
 }
 
@@ -321,6 +168,25 @@ struct IncomeDetailView: View {
 struct ExpenseDetailView: View {
     var body: some View {
         Text("Expense Details")
+    }
+}
+
+
+
+
+private struct SectionHeader: View {
+    let title: String
+    let systemImage: String
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: systemImage)
+                .font(.headline)
+            Text(title)
+                .font(.title2.bold())
+            Spacer()
+        }
+        .padding(.horizontal)
     }
 }
 
@@ -370,7 +236,8 @@ struct SpendingSectionView: View {
             CardView {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Spent").font(.subheadline)
-                    Text(thisMonthTotal, format: .currency(code: "USD"))
+                    Text(thisMonthTotal, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                         // format: .currency(code: "USD"))
                         .font(.title2).bold()
                     HStack(spacing: 4) {
                         Image(systemName: (thisMonthTotal - lastMonthTotal) >= 0
@@ -381,7 +248,7 @@ struct SpendingSectionView: View {
                         let diff = thisMonthTotal - lastMonthTotal
                         let isIncrease = diff >= 0
                         
-                        Text("\(abs(diff), format: .currency(code: "USD")) \(isIncrease ? "more" : "less") than last month")
+                        Text("\(abs(diff), format: .currency(code: Locale.current.currency?.identifier ?? "USD")) \(isIncrease ? "more" : "less") than last month")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
