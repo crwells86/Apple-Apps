@@ -19,59 +19,23 @@ struct ContentView: View {
     @State private var tabSelection = 1
     @State private var showingPaywall = false
     
-    //    init() {
-    //        // Navigation Bar appearance
-    //        let navBarAppearance = UINavigationBarAppearance()
-    //        navBarAppearance.configureWithOpaqueBackground()
-    //        navBarAppearance.backgroundColor = UIColor.systemBackground
-    //        navBarAppearance.titleTextAttributes = [.foregroundColor: UIColor.label]
-    //        navBarAppearance.largeTitleTextAttributes = [.foregroundColor: UIColor.label]
-    //
-    //        UINavigationBar.appearance().standardAppearance = navBarAppearance
-    //        UINavigationBar.appearance().scrollEdgeAppearance = navBarAppearance
-    //        UINavigationBar.appearance().compactAppearance = navBarAppearance
-    //        UINavigationBar.appearance().tintColor = UIColor.label
-    //
-    //        // Tab Bar appearance
-    //        let tabBarAppearance = UITabBarAppearance()
-    //        tabBarAppearance.configureWithOpaqueBackground()
-    //        tabBarAppearance.backgroundColor = UIColor.systemBackground
-    //        UITabBar.appearance().standardAppearance = tabBarAppearance
-    //        UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
-    //    }
-    
     var body: some View {
-        //        NavigationStack {
         if hasSeenOnboarding {
             TabView(selection: $tabSelection) {
                 Tab("Summary", systemImage: "dollarsign.gauge.chart.leftthird.topthird.rightthird", value: 1) {
                     if subscriptionController.isSubscribed {
-                        //                            NavigationStack {
                         SummaryTabView()
                             .environment(budget)
                             .environment(subscriptionController)
                             .navigationTitle("Summary")
-                        //                                    .toolbar {
-                        //                                        ToolbarItem(placement: .topBarLeading) {
-                        //                                            Image(systemName: "figure.pickleball")
-                        //                                        }
-                        //                                    }
-                        //                            }
                     } else {
                         PaywallView()
                     }
                 }
                 
                 Tab("Expenses", systemImage: "creditcard", value: 2) {
-                    //                        NavigationStack {
                     ExpenseTrackerView(tabSelection: $tabSelection)
                         .environment(budget)
-                    //                                .toolbar {
-                    //                                    ToolbarItem(placement: .topBarLeading) {
-                    //                                        Image(systemName: "gear")
-                    //                                    }
-                    //                                }
-                    //                        }
                 }
                 
                 Tab("Bills", systemImage: "calendar.badge.clock", value: 3) {
@@ -95,16 +59,6 @@ struct ContentView: View {
                 //                        DashboardView()
                 //                    }
             }
-            //                .navigationTitle(tabSelection == 1 && subscriptionController.isSubscribed ? "\(Date().formatted(.dateTime.month(.wide))) overview" : "")
-            //                .toolbar {
-            //                    ToolbarItem(placement: .navigationBarTrailing) {
-            //                        Button {
-            //                            sendFeedbackEmail()
-            //                        } label: {
-            //                            Label("Send Feedback", systemImage: "envelope")
-            //                        }
-            //                    }
-            //                }
             .onAppear {
                 preloadDefaultCategoriesIfNeeded()
                 
@@ -118,14 +72,10 @@ struct ContentView: View {
                 let center = UNUserNotificationCenter.current()
                 center.requestAuthorization(options: [.alert, .sound, .badge]) { _, _ in }
             }
-            .whatsNewSheet()
+            //            .whatsNewSheet()
         } else {
             OnboardingView(hasSeenOnboarding: $hasSeenOnboarding)
         }
-        //        }
-        //        .onAppear {
-        //            preloadDefaultCategoriesIfNeeded()
-        //        }
     }
     
     private func maybeRequestReview() {

@@ -98,7 +98,7 @@ struct WhatsNewView: View {
             } label: {
                 Text("Rate on the App Store")
                     .font(.footnote)
-                    .foregroundColor(.accentColor)
+                    .foregroundStyle(.tint)
                     .padding(.top, 8)
             }
             
@@ -115,7 +115,7 @@ struct WhatsNewView: View {
             }
         }
         .padding()
-        .background(Color.black.ignoresSafeArea())
+        .background(.background)
     }
 }
 
