@@ -2,7 +2,7 @@ import GameKit
 
 @Observable class GameCenterController: NSObject {
     static let shared = GameCenterController()
-    let leaderboardIDs = ["WordQuestDXHighScore", "WordQuestDXDailyHighScore"] // WordQuestDXDailyChallenge
+    let leaderboardIDs = ["WordQuestDXHighScore", "WordQuestDXDailyHighScore2"]
     var authenticated = false
     
     private override init() {

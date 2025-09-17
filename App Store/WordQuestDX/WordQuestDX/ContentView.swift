@@ -187,10 +187,6 @@ struct WordSearchView: View {
     @State private var showPromptSheet = false
     @State private var newTheme = ""
     
-    // Reference the on-device model
-    //    private var model = SystemLanguageModel.default
-    
-    // Game state
     @State private var foundWords: Set<String> = []
     @State private var foundPositions: Set<GridPosition> = []
     @State private var selectedPositions: [GridPosition] = []
@@ -215,7 +211,6 @@ struct WordSearchView: View {
     let minCellSize: CGFloat = 26
     
     @State private var score: Int = 0
-    
     
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     
@@ -525,19 +520,7 @@ struct WordSearchView: View {
             let rawWords = response.content.components(separatedBy: CharacterSet([",", "\n"]))
             
             // Step 2: Clean and uppercase words
-            //            let newWords = rawWords
-            //                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() }
-            //                .filter { !$0.isEmpty }
-            //
-            //            guard !newWords.isEmpty else {
-            //                resetGame()
-            //                return
-            //            }
-            //            words = newWords
-            
-            // Step 2: Clean and uppercase words
             let newWords = rawWords
-            //                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines.union(.punctuationCharacters)).uppercased() }
                 .map { $0.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() }
                 .map { word in
                     // Optionally, remove a trailing period if you only want to remove periods at the end
@@ -554,7 +537,6 @@ struct WordSearchView: View {
             }
             
             words = newWords
-            
             
             // Step 3: Determine grid size
             let longest = newWords.map(\.count).max() ?? 6
