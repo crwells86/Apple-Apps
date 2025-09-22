@@ -6,15 +6,15 @@ import Foundation
 import CoreText
 import PDFKit
 
-#if canImport(UIKit)
-extension UIFont {
-    func bold() -> UIFont { return withTraits(traits: .traitBold) }
-    private func withTraits(traits: UIFontDescriptor.SymbolicTraits) -> UIFont {
-        guard let descriptor = fontDescriptor.withSymbolicTraits(traits) else { return self }
-        return UIFont(descriptor: descriptor, size: pointSize)
-    }
-}
-#endif
+//#if canImport(UIKit)
+//extension UIFont {
+//    func bold() -> UIFont { return withTraits(traits: .traitBold) }
+//    private func withTraits(traits: UIFontDescriptor.SymbolicTraits) -> UIFont {
+//        guard let descriptor = fontDescriptor.withSymbolicTraits(traits) else { return self }
+//        return UIFont(descriptor: descriptor, size: pointSize)
+//    }
+//}
+//#endif
 
 struct TranscriptView: View {
     @Environment(\.modelContext) private var modelContext

@@ -12,7 +12,7 @@ struct ContentView: View {
     @Environment(StoreController.self) var storeController
     @Environment(\.modelContext) private var modelContext
     
-    @State private var controller = AIController(session: LanguageModelSession())
+    @State private var controller: AIController? = nil
     @State private var userInput: String = ""
     @FocusState private var isTextFieldFocused: Bool
     
@@ -79,7 +79,13 @@ struct ContentView: View {
                             if recordings.count > 7 {
                                 isPaywallShowing.toggle()
                             } else {
-                                modelContext.insert(Recording.blank())
+                                let new = Recording.blank()
+                                modelContext.insert(new)
+                                try? modelContext.save()
+                                // Select the newly created recording (recordings are reverse-sorted: newest first)
+                                selectedRecording = new
+                                // Reset controller for the new selection
+                                controller = AIController(session: LanguageModelSession())
                             }
                         } label: {
                             Label("Add Item", systemImage: "plus")
@@ -120,60 +126,47 @@ struct ContentView: View {
                             hasRequestedReview.toggle()
                         }
                     }
+                    if controller == nil, selectedRecording != nil {
+                        controller = AIController(session: LanguageModelSession())
+                    }
+                }
+                .onChange(of: selectedRecording?.persistentModelID) { _ in
+                    if selectedRecording != nil {
+                        controller = AIController(session: LanguageModelSession())
+                    } else {
+                        controller = nil
+                    }
                 }
             } detail: {
-                if let _ = selectedRecording {
+                if let selected = selectedRecording {
                     VStack(alignment: .leading, spacing: 0) {
-                        if let _ = Binding($selectedRecording) {
-                            if let selected = selectedRecording {
-                                // Pass a stable, non-optional binding to the concrete object.
-                                // Recording is a reference-type (SwiftData @Model), so .constant(selected)
-                                // gives the view a stable object for the lifetime of the detail screen.
-                                TranscriptView(controller: $controller, recording: .constant(selected)) { transcript in
-                                    // Work with the concrete Recording instance you captured.
-                                    let recordingRef = selected
-                                    
-                                    Task { @MainActor in
-                                        recordingRef.transcription?.text = transcript
-                                        recordingRef.updatedAt = .now
-                                        recordingRef.isDone = true
-                                        
-                                        do {
-                                            // Per-request ephemeral session/controller to avoid sharing any conversation state.
-                                            let session = LanguageModelSession()
-                                            let localController = AIController(session: session)
-
-                                            try await localController.titleGenerator(prompt: transcript)
-                                            // Read back from the **local** controller — guaranteed to be scoped to this transcript.
-                                            let generatedTitle = localController.title
-
-                                            recordingRef.title = generatedTitle
-                                        } catch {
-                                            print("Title generation failed: \(error)")
-                                        }
-                                        
-                                        try? modelContext.save()
-                                    }
+                        TranscriptView(
+                            controller: Binding(
+                                get: { controller ?? AIController(session: LanguageModelSession()) },
+                                set: { controller = $0 }
+                            ),
+                            recording: .constant(selected)
+                        ) { transcript in
+                            let recordingRef = selected
+                            Task { @MainActor in
+                                recordingRef.transcription?.text = transcript
+                                recordingRef.updatedAt = .now
+                                recordingRef.isDone = true
+                                do {
+                                    let session = LanguageModelSession()
+                                    let localController = AIController(session: session)
+                                    try await localController.titleGenerator(prompt: transcript)
+                                    let generatedTitle = localController.title
+                                    recordingRef.title = generatedTitle
+                                } catch {
+                                    print("Title generation failed: \(error)")
                                 }
-                            }
-                        }
-                        else {
-                            ContentUnavailableView {
-                                Label("Select a recording", systemImage: "waveform.path.ecg")
-                                    .font(.title2)
-                            } description: {
-                                Text("""
-                            Choose a recording from the list to view its transcript, play the audio, and generate a summary.
-                            
-                            Tap the \(Text(Image(systemName: "plus")).foregroundStyle(.blue)) button to create a new recording.
-                            """)
+                                try? modelContext.save()
                             }
                         }
                         
                         // MARK: Controls
-                        if let text = selectedRecording?.transcription?.text,
-                           !text.isEmpty {
-                            
+                        if let text = selected.transcription?.text, !text.isEmpty {
                             HStack {
                                 Button {
                                     isTextFieldFocused = false
@@ -191,7 +184,6 @@ struct ContentView: View {
                                     Image(systemName: "checklist")
                                 }
                                 
-                                
                                 Button {
                                     isChatPresented.toggle()
                                 } label: {
@@ -205,8 +197,9 @@ struct ContentView: View {
                             .padding(.horizontal)
                         }
                     }
-                    .navigationTitle(controller.title)
+                    .navigationTitle(selected.title)
                     .navigationBarTitleDisplayMode(.inline)
+                    .id(selected.persistentModelID)
                 } else {
                     ContentUnavailableView {
                         Label("Select a recording", systemImage: "waveform.path.ecg")
