@@ -16,6 +16,10 @@ class GameController: ObservableObject {
         lustyLines,
         afterDarkDares,
         shakespeare,
+        hauntedHearts,
+        wickedWhispers,
+        midnightMischief,
+        graveyardGames,
     ]
     
     // Custom questions saved persistently

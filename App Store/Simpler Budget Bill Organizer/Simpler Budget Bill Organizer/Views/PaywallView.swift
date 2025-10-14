@@ -8,13 +8,13 @@ struct PaywallView: View {
         ScrollView {
             VStack(spacing: 24) {
                 // MARK: - Header
-                Text("Unlock Premium")
+                Text("Unlock Lifetime Access")
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
                 
-                Text("Get the most out of your budget and take full control of your money.")
+                Text("One-time purchase. Unlock all features forever.")
                     .font(.body)
                     .multilineTextAlignment(.center)
                     .foregroundColor(.secondary)
@@ -34,36 +34,24 @@ struct PaywallView: View {
                 .cornerRadius(12)
                 .padding(.horizontal)
                 
-                // MARK: - Subscription Options
-                VStack(spacing: 16) {
-                    ForEach(subscriptionController.products) { product in
-                        Button {
-                            Task {
-                                await subscriptionController.purchase(product)
-                            }
-                        } label: {
-                            HStack {
-                                Circle()
-                                    .strokeBorder(product.id.contains("yearly") ? Color.clear : Color.gray, lineWidth: 1)
-                                    .background(Circle().fill(product.id.contains("yearly") ? Color.green : Color.clear))
-                                    .frame(width: 20, height: 20)
-                                
-                                Text(product.displayName)
-                                    .font(.headline)
-                                
-                                Spacer()
-                                
-                                VStack(alignment: .trailing, spacing: 2) {
-                                    Text(product.displayPrice)
-                                        .font(.headline)
-                                }
-                            }
-                            .padding()
-                            .background(product.id.contains("yearly") ? Color.green.opacity(0.1) : Color.gray.opacity(0.1))
-                            .cornerRadius(12)
+                if let product = subscriptionController.products.first {
+                    Button {
+                        Task { await subscriptionController.purchase(product) }
+                    } label: {
+                        HStack {
+                            Image(systemName: "checkmark.seal.fill")
+                                .foregroundColor(.green)
+                            Text(product.displayName)
+                                .font(.headline)
+                            Spacer()
+                            Text(product.displayPrice)
+                                .font(.headline)
                         }
-                        .buttonStyle(.plain)
+                        .padding()
+                        .background(Color.gray.opacity(0.1))
+                        .cornerRadius(12)
                     }
+                    .buttonStyle(.plain)
                 }
                 
                 // MARK: - CTA Button
@@ -74,7 +62,7 @@ struct PaywallView: View {
                         }
                     }
                 } label: {
-                    Text("Subscribe Now")
+                    Text("Buy Lifetime Access")
                         .font(.headline)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
@@ -94,7 +82,7 @@ struct PaywallView: View {
                 .foregroundColor(.blue)
                 .padding(.top)
                 
-                Text("Subscriptions auto-renew unless canceled at least 24 hours before the end of the current period. Manage or cancel anytime in your device Settings.")
+                Text("This is a one-time purchase. You can restore your purchase on a new device.")
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)

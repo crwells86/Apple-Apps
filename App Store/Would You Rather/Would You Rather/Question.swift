@@ -27,7 +27,7 @@ class Deck {
     var name: String
     var icon: String
 
-    @Relationship(.unique) // cascade delete when deck is deleted
+    @Relationship(deleteRule: .cascade) // cascade delete when deck is deleted
     var questions: [Question]
 
     init(id: UUID = UUID(), name: String, icon: String, questions: [Question] = []) {

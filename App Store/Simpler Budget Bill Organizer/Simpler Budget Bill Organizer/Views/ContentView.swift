@@ -55,6 +55,12 @@ struct ContentView: View {
                     }
                 }
                 
+//                Tab("Forecast", systemImage: "chart.line.uptrend.xyaxis", value: 5) {
+//                    NavigationStack {
+//                        CashFlowForecastView()
+//                    }
+//                }
+                
                 //                    Tab("Dashboard", systemImage: "swift", value: 5) {
                 //                        DashboardView()
                 //                    }

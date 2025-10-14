@@ -105,7 +105,7 @@ struct ContentView: View {
                             }
                             
                             Button("Send Feedback") {
-                                if let url = URL(string: "mailto:calebrwells@gmail.com?subject=Aı%20Note%20Taker%20Feedback") {
+                                if let url = URL(string: "mailto:caleb@olyevolutions.com?subject=Aı%20Note%20Taker%20Feedback") {
                                     UIApplication.shared.open(url)
                                 }
                             }
@@ -130,7 +130,7 @@ struct ContentView: View {
                         controller = AIController(session: LanguageModelSession())
                     }
                 }
-                .onChange(of: selectedRecording?.persistentModelID) { _ in
+                .onChange(of: selectedRecording?.persistentModelID) {
                     if selectedRecording != nil {
                         controller = AIController(session: LanguageModelSession())
                     } else {

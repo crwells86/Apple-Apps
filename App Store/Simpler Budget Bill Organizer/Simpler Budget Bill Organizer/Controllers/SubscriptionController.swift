@@ -4,8 +4,7 @@ import StoreKit
     var isSubscribed: Bool = false
     var products: [Product] = []
     
-    private let entitlementID = "Simpler Budget+"
-    private let productIDs = ["com.Simpler.Budget.weekly", "com.Simpler.Budget.yearly"]
+    private let productIDs = ["com.Simpler.Budget.lifetime"]
     
     init() {
         Task {
