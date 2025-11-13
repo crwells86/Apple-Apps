@@ -20,6 +20,8 @@ class GameController: ObservableObject {
         wickedWhispers,
         midnightMischief,
         graveyardGames,
+        thanksgivingSpice,
+        flirtyFeast
     ]
     
     // Custom questions saved persistently

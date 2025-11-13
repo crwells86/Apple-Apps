@@ -89,8 +89,8 @@ struct PaywallView: View {
                     .padding(.top)
                 
                 HStack(spacing: 24) {
-                    Link("Privacy Policy", destination: URL(string: "https://github.com/crwells86/Privacy-Policy")!)
-                    Link("Terms of Use", destination: URL(string: "https://github.com/crwells86/Terms-of-Use")!)
+                    Link("Privacy Policy", destination: URL(string: "https://www.olyevolutions.com/privacy-policy")!)
+                    Link("Terms of Use", destination: URL(string: "https://www.olyevolutions.com/terms-of-use")!)
                 }
                 .font(.footnote)
                 .foregroundColor(.gray)

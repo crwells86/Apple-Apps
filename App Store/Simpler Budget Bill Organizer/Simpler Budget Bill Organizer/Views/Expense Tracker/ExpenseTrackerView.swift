@@ -253,7 +253,7 @@ struct ExpenseTrackerView: View {
     func sendFeedbackEmail() {
         let subject = "App Feedback – Simpler Budget"
         let body = "Share some feedback..."
-        let email = "calebrwells@gmail.com"
+        let email = "caleb@olyevolutions.com"
         
         let emailURL = URL(string: "mailto:\(email)?subject=\(subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")&body=\(body.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")")
 
