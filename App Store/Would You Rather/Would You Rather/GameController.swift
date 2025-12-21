@@ -21,7 +21,9 @@ class GameController: ObservableObject {
         midnightMischief,
         graveyardGames,
         thanksgivingSpice,
-        flirtyFeast
+        flirtyFeast,
+        naughtyListNights,
+        mistletoeMischief
     ]
     
     // Custom questions saved persistently
