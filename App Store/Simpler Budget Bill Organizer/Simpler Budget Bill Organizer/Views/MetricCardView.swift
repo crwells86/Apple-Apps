@@ -12,9 +12,6 @@ struct MetricCardView: View {
                 Text(title)
                     .font(.headline)
                 Spacer()
-                //                Image(systemName: "chevron.right")
-                //                    .font(.caption)
-                //                    .foregroundColor(.secondary)
             }
             
             Text(value, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))

@@ -18,4 +18,13 @@ extension Date {
         formatter.timeStyle = .none
         return formatter.string(from: self)
     }
+    
+    var greeting: String {
+        let hour = Calendar.current.component(.hour, from: self)
+        switch hour {
+        case 5..<12: return "Good Morning!"
+        case 12..<17: return "Good Afternoon!"
+        default: return "Good Evening!"
+        }
+    }
 }

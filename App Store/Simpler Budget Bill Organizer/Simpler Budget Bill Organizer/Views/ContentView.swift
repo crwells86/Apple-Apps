@@ -54,16 +54,6 @@ struct ContentView: View {
                         PaywallView()
                     }
                 }
-                
-//                Tab("Forecast", systemImage: "chart.line.uptrend.xyaxis", value: 5) {
-//                    NavigationStack {
-//                        CashFlowForecastView()
-//                    }
-//                }
-                
-                //                    Tab("Dashboard", systemImage: "swift", value: 5) {
-                //                        DashboardView()
-                //                    }
             }
             .onAppear {
                 preloadDefaultCategoriesIfNeeded()
@@ -144,54 +134,8 @@ struct ContentView: View {
 
 
 
-import SwiftUI
-import SwiftData
-import Foundation
 
-// MARK: - Controller (dynamic state + models)
-@Observable
-class DashboardController {
-    var totalBalance: Decimal = 25000.40
-    var incomeTotal: Decimal = 20000
-    var outcomeTotal: Decimal = 17000
-    
-    var earnings: [(initial: String, source: String, amount: Decimal, color: Color)] = [
-        ("U", "Upwork", 3000, .orange),
-        ("F", "Freepik", 3000, .pink),
-        ("W", "Envato", 2000, .blue)
-    ]
-    
-    var savings: [(title: String, amount: Decimal, progress: Double, color: Color)] = [
-        ("Iphone 13 Mini", 699, 0.2, .red),
-        ("Macbook Pro M1", 1499, 0.45, .pink),
-        ("Car", 20000, 0.6, .yellow),
-        ("House", 30500, 0.8, .blue)
-    ]
-    
-    var transactions: [Transaction] = [
-        Transaction(name: "Adobe Illustrator",
-                    amount: -32.0,
-                    frequency: .monthly,
-                    dueDate: nil,
-                    isAutoPaid: false,
-                    isPaid: true,
-                    notes: "Subscription fee",
-                    vendor: "Adobe",
-                    isActive: true)
-    ]
-}
 
-// MARK: - Helpers
-extension Date {
-    var greeting: String {
-        let hour = Calendar.current.component(.hour, from: self)
-        switch hour {
-        case 5..<12: return "Good Morning!"
-        case 12..<17: return "Good Afternoon!"
-        default: return "Good Evening!"
-        }
-    }
-}
 
 // MARK: - Header
 struct HeaderView: View {
@@ -232,14 +176,6 @@ struct BalanceCard: View {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(Color(.secondarySystemGroupedBackground))
                 .frame(height: 120)
-            
-            //            GeometryReader { geo in
-            //                let w = geo.size.width
-            //                Circle().fill(Color.blue).frame(width: 72).offset(x: w - 70, y: -10)
-            //                Circle().fill(Color.yellow).frame(width: 60).offset(x: w - 25, y: 50)
-            //                Circle().fill(Color.green).frame(width: 60).offset(x: -20, y: 70)
-            //            }
-            //            .clipped()
             
             HStack {
                 VStack(alignment: .leading, spacing: 8) {

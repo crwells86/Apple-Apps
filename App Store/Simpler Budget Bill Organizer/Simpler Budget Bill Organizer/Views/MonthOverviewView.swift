@@ -11,7 +11,6 @@ struct MonthOverviewView: View {
                 .font(.system(size: 42, weight: .bold))
             
             Text("Out of \(budgeted, format: .currency(code: Locale.current.currency?.identifier ?? "USD")) budgeted")
-    // format: .currency(code: "USD")) budgeted")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }
