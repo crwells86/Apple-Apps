@@ -3,76 +3,64 @@ import StoreKit
 
 struct PaywallView: View {
     @Environment(SubscriptionController.self) var subscriptionController
+    @State private var selectedProduct: Product?
     
     var body: some View {
         ScrollView {
-            VStack(spacing: 24) {
+            VStack(spacing: 28) {
+                
                 // MARK: - Header
-                Text("Unlock Lifetime Access")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
+                VStack(spacing: 12) {
+                    Text("Take Control of Your Money")
+                        .font(.system(size: 30, weight: .bold))
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.top)
                 
-                Text("One-time purchase. Unlock all features forever.")
-                    .font(.body)
-                    .multilineTextAlignment(.center)
-                    .foregroundColor(.secondary)
-                    .padding(.horizontal)
-                
-                // MARK: - Feature List
+                // MARK: - Feature Card
                 VStack(alignment: .leading, spacing: 16) {
-                    PaywallFeature(symbol: "chart.bar.xaxis", text: "Access the Summary & Income tabs")
-                    PaywallFeature(symbol: "mic.fill", text: "Voice-to-Expense entry")
-                    PaywallFeature(symbol: "creditcard.fill", text: "Auto-import Apple Card & Apple Cash expenses")
-                    //                    PaywallFeature(symbol: "dollarsign.circle", text: "Track income and auto-budget")
-                    //                    PaywallFeature(symbol: "arrow.up.doc.fill", text: "Export reports to PDF")
-                    PaywallFeature(symbol: "lock.shield", text: "Private & offline – no accounts, no ads")
+                    PaywallFeature(symbol: "chart.bar.xaxis", text: "Track spending with smart categories")
+                    PaywallFeature(symbol: "mic.fill", text: "Add expenses with your voice")
+                    PaywallFeature(symbol: "creditcard.fill", text: "Auto-import Apple Card & Apple Cash")
+                    PaywallFeature(symbol: "calendar", text: "Manage bills & recurring expenses")
+                    PaywallFeature(symbol: "lock.shield", text: "Private & offline — no accounts, no ads")
                 }
                 .padding()
                 .background(Color(.systemGray6))
-                .cornerRadius(12)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .padding(.horizontal)
+                                
+                // MARK: - Product Selection
+                VStack(spacing: 12) {
+                    ForEach(subscriptionController.products, id: \.id) { product in
+                        productCard(product)
+                    }
+                }
                 .padding(.horizontal)
                 
-                if let product = subscriptionController.products.first {
-                    Button {
-                        Task { await subscriptionController.purchase(product) }
-                    } label: {
-                        HStack {
-                            Image(systemName: "checkmark.seal.fill")
-                                .foregroundColor(.green)
-                            Text(product.displayName)
-                                .font(.headline)
-                            Spacer()
-                            Text(product.displayPrice)
-                                .font(.headline)
-                        }
-                        .padding()
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(12)
-                    }
-                    .buttonStyle(.plain)
-                }
-                
-                // MARK: - CTA Button
+                // MARK: - CTA
                 Button {
                     Task {
-                        if let product = subscriptionController.products.first {
+                        if let product = selectedProduct {
                             await subscriptionController.purchase(product)
                         }
                     }
                 } label: {
-                    Text("Buy Lifetime Access")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.green)
-                        .cornerRadius(12)
+                    Text(selectedProduct == nil
+                         ? "Select a Plan"
+                         : "Unlock for \(selectedProduct!.displayPrice)")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(selectedProduct == nil ? Color.gray : Color.green)
+                    .cornerRadius(14)
                 }
-                .padding(.top)
+                .disabled(selectedProduct == nil)
+                .padding(.horizontal)
+                .animation(.easeInOut(duration: 0.2), value: selectedProduct)
                 
-                // MARK: - Restore / Legal
+                // MARK: - Restore
                 Button("Restore Purchases") {
                     Task {
                         await subscriptionController.restorePurchases()
@@ -80,28 +68,106 @@ struct PaywallView: View {
                 }
                 .font(.footnote)
                 .foregroundColor(.blue)
-                .padding(.top)
                 
-                Text("This is a one-time purchase. You can restore your purchase on a new device.")
+                // MARK: - Footer
+                VStack(spacing: 8) {
+                    Text(footerText)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                    
+                    HStack(spacing: 20) {
+                        Link("Privacy", destination: URL(string: "https://github.com/crwells86/Privacy-Policy")!)
+                        Link("Terms", destination: URL(string: "https://github.com/crwells86/Terms-of-Use")!)
+                    }
                     .font(.caption)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.top)
-                
-                HStack(spacing: 24) {
-                    Link("Privacy Policy", destination: URL(string: "https://www.olyevolutions.com/privacy-policy")!)
-                    Link("Terms of Use", destination: URL(string: "https://www.olyevolutions.com/terms-of-use")!)
+                    .foregroundColor(.gray)
                 }
-                .font(.footnote)
-                .foregroundColor(.gray)
-                .padding(.top)
+                .padding(.bottom)
             }
             .padding()
         }
+        .onAppear {
+            // Default select lifetime if available
+            selectedProduct = subscriptionController.products.first(where: {
+                $0.id.contains("lifetime")
+            }) ?? subscriptionController.products.first
+        }
+    }
+    
+    private var footerText: String {
+        guard let product = selectedProduct else {
+            return "Select a plan to continue."
+        }
+        
+        if product.id.contains("lifetime") {
+            return "One-time purchase. Lifetime access. No subscriptions."
+        } else {
+            return "Billed yearly. Cancel anytime in Settings."
+        }
+    }
+    
+    // MARK: - Product Card
+    private func productCard(_ product: Product) -> some View {
+        let isSelected = selectedProduct?.id == product.id
+        let isLifetime = product.id.contains("lifetime")
+        
+        return Button {
+            selectedProduct = product
+        } label: {
+            ZStack(alignment: .topTrailing) {
+                
+                HStack {
+                    Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                        .foregroundColor(isSelected ? .green : .gray)
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(product.displayName)
+                            .font(.headline)
+                        
+                        if isLifetime {
+                            Text("Pay once, use forever")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        } else if product.type == .autoRenewable {
+                            Text("Billed yearly")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    Text(product.displayPrice)
+                        .font(.headline)
+                }
+                .padding()
+                .background(isSelected ? Color.green.opacity(0.15) : Color(.systemGray6))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(isSelected ? Color.green : Color.clear, lineWidth: 2)
+                )
+                .cornerRadius(14)
+                
+                // Badge
+                if isLifetime {
+                    Text("BEST VALUE")
+                        .font(.caption2)
+                        .fontWeight(.bold)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.green)
+                        .foregroundColor(.white)
+                        .cornerRadius(6)
+                        .offset(x: -4, y: -4)
+                }
+            }
+        }
+        .buttonStyle(.plain)
     }
 }
 
-// MARK: - Feature Row View
+// MARK: - Feature Row
 private struct PaywallFeature: View {
     let symbol: String
     let text: String
@@ -110,16 +176,11 @@ private struct PaywallFeature: View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: symbol)
                 .foregroundColor(.green)
-                .font(.system(size: 20, weight: .semibold))
                 .frame(width: 24)
+            
             Text(text)
                 .font(.body)
-                .foregroundColor(.primary)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
-}
-
-#Preview {
-    PaywallView()
 }

@@ -54,6 +54,11 @@ struct ContentView: View {
                         PaywallView()
                     }
                 }
+                
+                Tab("AI", systemImage: "sparkles", value: 3) {
+                    Text("Hi!")
+                    .environment(budget)
+                }
             }
             .onAppear {
                 preloadDefaultCategoriesIfNeeded()
