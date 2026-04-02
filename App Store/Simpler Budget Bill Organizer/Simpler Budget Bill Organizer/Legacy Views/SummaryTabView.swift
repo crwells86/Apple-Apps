@@ -235,7 +235,7 @@ struct SummaryTabView: View {
     private func sendFeedbackEmail() {
         let subject = "App Feedback – Simpler Budget"
         let body = "Share some feedback..."
-        let email = "caleb@olyevolutions.com"
+        let email = "calebrwells@gmail.com"
         
         let emailURL = URL(string: "mailto:\(email)?subject=\(subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")&body=\(body.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")")
         

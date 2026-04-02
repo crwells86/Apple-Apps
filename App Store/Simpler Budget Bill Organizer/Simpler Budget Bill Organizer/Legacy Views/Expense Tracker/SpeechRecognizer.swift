@@ -404,3 +404,247 @@ extension DateFormatter {
         return formatter
     }()
 }
+
+
+
+//import Foundation
+//import Speech
+//import AVFoundation
+//import FoundationModels
+//
+//// MARK: - SpeechRecognizer
+//
+//@Observable
+//final class SpeechRecognizer: NSObject, SFSpeechRecognizerDelegate {
+//    private let recognizer = SFSpeechRecognizer(locale: .current)!
+//    private var request: SFSpeechAudioBufferRecognitionRequest?
+//    private var recognitionTask: SFSpeechRecognitionTask?
+//    private let audioEngine = AVAudioEngine()
+//
+//    var recognizedText: String = ""
+//
+//    func startRecording() throws {
+//        print("[SpeechRecognizer] startRecording() called")
+//        audioEngine.stop()
+//        audioEngine.reset()
+//
+//        request = SFSpeechAudioBufferRecognitionRequest()
+//        guard let request else { throw NSError(domain: "SpeechRecognizer", code: -1) }
+//
+//        let session = AVAudioSession.sharedInstance()
+//        try session.setCategory(.playAndRecord, mode: .default, options: [.duckOthers, .defaultToSpeaker])
+//        try session.setActive(true, options: .notifyOthersOnDeactivation)
+//
+//        let inputNode = audioEngine.inputNode
+//        inputNode.removeTap(onBus: 0) // ✅ important
+//
+//        let format = inputNode.outputFormat(forBus: 0)
+//        inputNode.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
+//            self?.request?.append(buffer)
+//        }
+//
+//        audioEngine.prepare()
+//        try audioEngine.start()
+//        print("[SpeechRecognizer] audioEngine started")
+//
+//        recognitionTask = recognizer.recognitionTask(with: request) { [weak self] result, error in
+//            guard let self else { return }
+//
+//            if let result {
+//                self.recognizedText = result.bestTranscription.formattedString
+//                print("[SpeechRecognizer] recognizedText: '", result.bestTranscription.formattedString, "'")
+//            }
+//
+//            if let error = error {
+//                print("[SpeechRecognizer] Error:", error.localizedDescription)
+//            }
+//
+//            if error != nil || (result?.isFinal ?? false) {
+//                print("[SpeechRecognizer] recognition finished.")
+//                self.audioEngine.stop()
+//                self.audioEngine.reset()
+//                inputNode.removeTap(onBus: 0)
+//                self.request = nil
+//                self.recognitionTask = nil
+//            }
+//        }
+//    }
+//
+//    func stopRecording() {
+//        print("[SpeechRecognizer] stopRecording() called")
+//        audioEngine.stop()
+//        request?.endAudio()
+//    }
+//
+//    func requestPermissions(completion: @escaping (Bool) -> Void) {
+//        SFSpeechRecognizer.requestAuthorization { authStatus in
+//            DispatchQueue.main.async {
+//                let micStatus = AVAudioApplication.shared.recordPermission
+//                let micGranted = micStatus == .granted || micStatus == .undetermined
+//                completion(authStatus == .authorized && micGranted)
+//            }
+//        }
+//    }
+//}
+//
+//// MARK: - Generable types
+//
+///// Structured output schema for full expense parsing from a voice transcript.
+//@Generable
+//struct ParsedExpense {
+//    @Guide(description: "The expense amount as a decimal number, e.g. 12.50. Interpret spoken numbers like 'twenty five dollars' as 25.0.")
+//    var amount: Double
+//
+//    @Guide(description: "The merchant or vendor name, properly capitalised. Use the most recognisable form, e.g. 'Starbucks' not 'star bucks'.")
+//    var vendor: String
+//
+//    @Guide(description: "The most fitting category. Must be exactly one of: Food, Transportation, Utilities, Entertainment, Healthcare, Travel, Subscriptions, Shopping, Personal Care, Education, Gifts, Insurance, Savings, Other.")
+//    var category: String
+//
+//    @Guide(description: "ISO 8601 date string (yyyy-MM-dd) if a specific date was mentioned in the transcript, otherwise an empty string.")
+//    var mentionedDate: String
+//}
+//
+///// Lightweight schema used only for category hints in ManualEntryView.
+//@Generable
+//struct CategorySuggestion {
+//    @Guide(description: "The single best-fitting category name. Must be exactly one of: Food, Transportation, Utilities, Entertainment, Healthcare, Travel, Subscriptions, Shopping, Personal Care, Education, Gifts, Insurance, Savings, Other.")
+//    var category: String
+//}
+//
+//// MARK: - ExpenseParser
+//
+///// Wraps a long-lived LanguageModelSession so conversation context is retained
+///// across parses within the same app session. Falls back gracefully when the
+///// on-device model is unavailable (simulator, unsupported device).
+//@Observable
+//final class ExpenseParser {
+//
+//    private var session: LanguageModelSession?
+//
+//    init() {
+//        guard SystemLanguageModel.default.isAvailable else { return }
+//        session = LanguageModelSession()
+//    }
+//
+//    // MARK: Voice / transcript parsing
+//
+//    /// Parse a full spoken transcript into an Expense model object.
+//    func parse(transcript: String) async throws -> Expense? {
+//        guard let session else {
+//            return legacyParse(transcript: transcript)
+//        }
+//
+//        let response = try await session.respond(
+//            to: """
+//            Extract the expense details from this voice memo transcript: "\(transcript)"
+//            If a field cannot be determined with confidence, use a sensible default \
+//            (0 for amount, empty string for vendor/date).
+//            """,
+//            generating: ParsedExpense.self
+//        )
+//
+//        let parsed = response.content
+//        let amount = Decimal(parsed.amount)
+//        let date   = parseDate(from: parsed.mentionedDate) ?? .now
+//
+//        return Expense(
+//            amount: amount,
+//            vendor: parsed.vendor,
+//            date: date,
+//            category: nil   // Caller resolves Category by matching parsed.category name
+//        )
+//    }
+//
+//    // MARK: Category suggestion (for ManualEntryView)
+//
+//    /// Returns a suggested category name given a vendor name, or nil if unavailable.
+//    func suggestCategory(for vendorName: String) async throws -> String? {
+//        let trimmed = vendorName.trimmingCharacters(in: .whitespaces)
+//        guard !trimmed.isEmpty else { return nil }
+//
+//        guard let session else {
+//            return legacySuggestCategory(for: trimmed)
+//        }
+//
+//        let response = try await session.respond(
+//            to: "What single category best fits an expense from '\(trimmed)'?",
+//            generating: CategorySuggestion.self
+//        )
+//
+//        let category = response.content.category
+//        return category.isEmpty ? nil : category
+//    }
+//
+//    // MARK: - Private helpers
+//
+//    private func parseDate(from isoString: String) -> Date? {
+//        guard !isoString.isEmpty else { return nil }
+//        let formatter = ISO8601DateFormatter()
+//        formatter.formatOptions = [.withFullDate]
+//        return formatter.date(from: isoString)
+//    }
+//
+//    // MARK: - Legacy fallback (used when Foundation Models unavailable)
+//
+//    private func legacyParse(transcript: String) -> Expense? {
+//        let amount = legacyParseAmount(from: transcript)
+//        let vendor = legacyParseVendor(from: transcript)
+//        return Expense(
+//            amount: Decimal(amount ?? 0),
+//            vendor: vendor,
+//            date: .now,
+//            category: nil
+//        )
+//    }
+//
+//    private func legacyParseAmount(from transcript: String) -> Double? {
+//        let pattern = #"(?:(\$)?(\d{1,6})(?:[.,](\d{1,2}))?)"#
+//        let regex = try! NSRegularExpression(pattern: pattern)
+//        let ns = transcript as NSString
+//        guard let m = regex.firstMatch(
+//            in: transcript, range: NSRange(location: 0, length: ns.length)
+//        ) else { return nil }
+//
+//        let hasDollar = m.range(at: 1).location != NSNotFound
+//        let dStr = ns.substring(with: m.range(at: 2))
+//        let cStr = m.range(at: 3).location != NSNotFound ? ns.substring(with: m.range(at: 3)) : ""
+//
+//        if hasDollar || !cStr.isEmpty {
+//            return Double(cStr.isEmpty ? dStr : "\(dStr).\(cStr)")
+//        } else if let iv = Int(dStr) {
+//            return Double(iv) / 100
+//        }
+//        return nil
+//    }
+//
+//    private func legacyParseVendor(from transcript: String) -> String {
+//        transcript.components(separatedBy: .whitespaces).last ?? ""
+//    }
+//
+//    private func legacySuggestCategory(for vendor: String) -> String? {
+//        let lower = vendor.lowercased()
+//        let map: [String: [String]] = [
+//            "Food":           ["starbucks", "mcdonalds", "chipotle", "subway", "pizza", "burger", "cafe", "restaurant", "sushi", "diner"],
+//            "Transportation": ["uber", "lyft", "shell", "exxon", "chevron", "bp", "gas", "fuel"],
+//            "Subscriptions":  ["netflix", "spotify", "hulu", "apple", "youtube", "prime", "disney"],
+//            "Shopping":       ["walmart", "target", "costco", "safeway", "kroger", "aldi", "whole foods", "trader joe", "amazon"],
+//            "Healthcare":     ["cvs", "walgreens", "rite aid", "pharmacy", "clinic", "doctor"],
+//            "Entertainment":  ["best buy", "ikea", "home depot", "lowes", "macy", "nordstrom"]
+//        ]
+//        for (category, keywords) in map {
+//            if keywords.contains(where: { lower.contains($0) }) { return category }
+//        }
+//        return nil
+//    }
+//}
+//
+//// MARK: - DateFormatter extension
+//
+//extension DateFormatter {
+//    static let monthAndYear: DateFormatter = {
+//        let f = DateFormatter()
+//        f.dateFormat = "MMMM yyyy"
+//        return f
+//    }()
+//}
