@@ -19,6 +19,10 @@ struct ContentView: View {
     @State private var tabSelection = 1
     @State private var showingPaywall = false
     
+    
+    @AppStorage("hasSeenFeedbackPrompt") private var hasSeenFeedbackPrompt = false
+    @State private var showFeedbackSheet = false
+    
     var body: some View {
         if hasSeenOnboarding {
             TabView(selection: $tabSelection) {
@@ -55,10 +59,10 @@ struct ContentView: View {
                     }
                 }
                 
-                Tab("AI", systemImage: "sparkles", value: 3) {
-                    Text("Hi!")
-                    .environment(budget)
-                }
+//                Tab("AI", systemImage: "sparkles", value: 3) {
+//                    Text("Hi!")
+//                    .environment(budget)
+//                }
             }
             .onAppear {
                 preloadDefaultCategoriesIfNeeded()
@@ -72,10 +76,37 @@ struct ContentView: View {
                 
                 let center = UNUserNotificationCenter.current()
                 center.requestAuthorization(options: [.alert, .sound, .badge]) { _, _ in }
+                
+                
+                checkForFeedbackPrompt()
             }
             //            .whatsNewSheet()
+            .sheet(isPresented: $showFeedbackSheet) {
+                FeedbackSheetView()
+            }
         } else {
             OnboardingView(hasSeenOnboarding: $hasSeenOnboarding)
+        }
+    }
+    
+    private func checkForFeedbackPrompt() {
+        guard !hasSeenFeedbackPrompt else { return }
+        
+        let calendar = Calendar.current
+        let now = Date()
+        
+        var targetComponents = DateComponents()
+        targetComponents.year = 2026
+        targetComponents.month = 4
+        targetComponents.day = 15
+        
+        if let targetDate = calendar.date(from: targetComponents),
+           now >= targetDate {
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                showFeedbackSheet = true
+                hasSeenFeedbackPrompt = true
+            }
         }
     }
     
@@ -131,7 +162,56 @@ struct ContentView: View {
 
 
 
+struct FeedbackSheetView: View {
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                
+                Text("We'd love your feedback")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                
+                Text("""
+Help us improve the app!
 
+We’d love to know:
+• What you use the most
+• What you don’t use
+• What you like / dislike
+• Features you’d like added
+
+We’re also exploring local private AI for automating finances using Apple Intelligence (iOS 26+). Let us know if that’s something you’d want!
+""")
+                .font(.body)
+                .multilineTextAlignment(.leading)
+                
+                Button(action: {
+                    if let url = URL(string: "https://docs.google.com/forms/d/e/1FAIpQLSdDjzjw5JUQ-duuK__0Z7s7caQGJ1q-TlLoXgoZjk4AwTUfRg/viewform?usp=publish-editor") {
+                        UIApplication.shared.open(url)
+                    }
+                }) {
+                    Text("Give Feedback")
+                        .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(12)
+                }
+                
+                Button("Maybe Later") {
+                    dismiss()
+                }
+                .foregroundColor(.secondary)
+            }
+            .padding()
+            .navigationTitle("Feedback")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+    }
+}
 
 
 
