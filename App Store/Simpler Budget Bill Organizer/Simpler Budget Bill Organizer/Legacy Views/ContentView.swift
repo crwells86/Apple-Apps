@@ -2,6 +2,13 @@ import SwiftUI
 import StoreKit
 import SwiftData
 
+
+#if canImport(FoundationModels)
+import FoundationModels
+@available(iOS 26.0, *)
+private let languageModel = SystemLanguageModel.default
+#endif
+
 struct ContentView: View {
     @Environment(\.modelContext) private var context
     @Environment(SubscriptionController.self) var subscriptionController
@@ -20,8 +27,10 @@ struct ContentView: View {
     @State private var showingPaywall = false
     
     
-    @AppStorage("hasSeenFeedbackPrompt") private var hasSeenFeedbackPrompt = false
-    @State private var showFeedbackSheet = false
+    //    @AppStorage("hasSeenFeedbackPrompt") private var hasSeenFeedbackPrompt = false
+    //    @State private var showFeedbackSheet = false
+    @AppStorage("hasSeenAIWhatsNew") private var hasSeenAIWhatsNew = false
+    @State private var showAIWhatsNew = false
     
     var body: some View {
         if hasSeenOnboarding {
@@ -59,10 +68,14 @@ struct ContentView: View {
                     }
                 }
                 
-//                Tab("AI", systemImage: "sparkles", value: 3) {
-//                    Text("Hi!")
-//                    .environment(budget)
-//                }
+                if #available(iOS 26.0, *),
+                   languageModel.availability == .available {
+                    
+                    Tab("Chat", systemImage: "message.fill", value: 5) {
+                        FinanceChatView()
+                            .environment(budget)
+                    }
+                }
             }
             .onAppear {
                 preloadDefaultCategoriesIfNeeded()
@@ -78,37 +91,57 @@ struct ContentView: View {
                 center.requestAuthorization(options: [.alert, .sound, .badge]) { _, _ in }
                 
                 
-                checkForFeedbackPrompt()
+                //                checkForFeedbackPrompt()
+            }
+            .onAppear {
+#if canImport(FoundationModels)
+                if #available(iOS 26, *) {
+                    if languageModel.availability == .available && !hasSeenAIWhatsNew {
+                        showAIWhatsNew = true
+                    }
+                }
+#endif
+            }
+            .sheet(isPresented: $showAIWhatsNew) {
+                WhatsNewAIView {
+                    hasSeenAIWhatsNew = true
+                    showAIWhatsNew = false
+                }
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+                .onDisappear {
+                    hasSeenAIWhatsNew = true
+                }
             }
             //            .whatsNewSheet()
-            .sheet(isPresented: $showFeedbackSheet) {
-                FeedbackSheetView()
-            }
+            //            .sheet(isPresented: $showFeedbackSheet) {
+            //                FeedbackSheetView()
+            //            }
         } else {
             OnboardingView(hasSeenOnboarding: $hasSeenOnboarding)
         }
     }
     
-    private func checkForFeedbackPrompt() {
-        guard !hasSeenFeedbackPrompt else { return }
-        
-        let calendar = Calendar.current
-        let now = Date()
-        
-        var targetComponents = DateComponents()
-        targetComponents.year = 2026
-        targetComponents.month = 4
-        targetComponents.day = 15
-        
-        if let targetDate = calendar.date(from: targetComponents),
-           now >= targetDate {
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                showFeedbackSheet = true
-                hasSeenFeedbackPrompt = true
-            }
-        }
-    }
+    //    private func checkForFeedbackPrompt() {
+    //        guard !hasSeenFeedbackPrompt else { return }
+    //
+    //        let calendar = Calendar.current
+    //        let now = Date()
+    //
+    //        var targetComponents = DateComponents()
+    //        targetComponents.year = 2026
+    //        targetComponents.month = 4
+    //        targetComponents.day = 15
+    //
+    //        if let targetDate = calendar.date(from: targetComponents),
+    //           now >= targetDate {
+    //
+    //            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+    //                showFeedbackSheet = true
+    //                hasSeenFeedbackPrompt = true
+    //            }
+    //        }
+    //    }
     
     private func maybeRequestReview() {
         guard sessionCount >= 7, !hasRequestedReview else { return }
@@ -123,7 +156,7 @@ struct ContentView: View {
     func sendFeedbackEmail() {
         let subject = "App Feedback – Simpler Budget"
         let body = "Share some feedback..."
-        let email = "calebrwells@gmail.com"
+        let email = "olyevolutions@gmail.com"
         
         let emailURL = URL(string: "mailto:\(email)?subject=\(subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")&body=\(body.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")")
         
@@ -464,3 +497,36 @@ struct SectionHeader2: View {
 #Preview {
     DashboardView()
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
