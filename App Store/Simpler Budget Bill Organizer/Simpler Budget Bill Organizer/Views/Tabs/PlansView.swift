@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct PlansView: View {
-    
     @State private var controller = PlansController()
     
     var body: some View {
