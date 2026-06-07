@@ -1247,3 +1247,572 @@
 //#Preview {
 //    OnboardingContainerView()
 //}
+
+
+
+
+
+
+
+
+import SwiftUI
+import StoreKit
+
+// MARK: - Onboarding Coordinator
+
+struct OnboardingFlow: View {
+    @Environment(SubscriptionController.self) var subscriptionController
+    @State private var currentPage = 0
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+
+    private let pages: [OnboardingPage2] = [
+        OnboardingPage2(
+            systemImage: "dollarsign.circle.fill",
+            imageColor: .green,
+            title: "Your Money,\nYour Rules",
+            subtitle: "A smarter way to manage every dollar — no bank connections, no subscriptions, no nonsense.",
+            backgroundSymbol: "dollarsign"
+        ),
+        OnboardingPage2(
+            systemImage: "mic.fill",
+            imageColor: .green,
+            title: "Add Expenses\nin Seconds",
+            subtitle: "Speak or type to log spending on the spot. Organize into custom categories and get budget alerts before you overspend.",
+            backgroundSymbol: "waveform"
+        ),
+        OnboardingPage2(
+            systemImage: "creditcard.fill",
+            imageColor: .green,
+            title: "Apple Card\nNatively Supported",
+            subtitle: "Automatically sync Apple Card and Apple Cash transactions. Everything else stays manual — because your data is yours alone.",
+            backgroundSymbol: "lock.shield"
+        ),
+        OnboardingPage2(
+            systemImage: "chart.bar.xaxis",
+            imageColor: .green,
+            title: "See the\nBig Picture",
+            subtitle: "Visual breakdowns, recurring bills, income tracking, and insights — all in one place, all offline.",
+            backgroundSymbol: "chart.pie"
+        )
+    ]
+
+    var body: some View {
+        ZStack {
+            if currentPage < pages.count {
+                OnboardingPageView(
+                    page: pages[currentPage],
+                    pageIndex: currentPage,
+                    pageCount: pages.count,
+                    onNext: {
+                        withAnimation(.spring(response: 0.5, dampingFraction: 0.82)) {
+                            currentPage += 1
+                        }
+                    }
+                )
+                .id(currentPage)
+                .transition(
+                    .asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)
+                    )
+                )
+            } else {
+                OnboardingPaywallView(onComplete: {
+                    hasSeenOnboarding = true
+                })
+                .transition(
+                    .asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)
+                    )
+                )
+            }
+        }
+        .animation(.spring(response: 0.5, dampingFraction: 0.82), value: currentPage)
+    }
+}
+
+// MARK: - Page Model
+
+struct OnboardingPage2 {
+    let systemImage: String
+    let imageColor: Color
+    let title: String
+    let subtitle: String
+    let backgroundSymbol: String
+}
+
+// MARK: - Single Onboarding Page
+
+struct OnboardingPageView: View {
+    let page: OnboardingPage2
+    let pageIndex: Int
+    let pageCount: Int
+    let onNext: () -> Void
+
+    @State private var appeared = false
+
+    var body: some View {
+        ZStack {
+            // Background
+            Color(.systemBackground)
+                .ignoresSafeArea()
+
+            // Decorative large background symbol
+            Image(systemName: page.backgroundSymbol)
+                .font(.system(size: 320, weight: .ultraLight))
+                .foregroundStyle(Color.green.opacity(0.06))
+                .rotationEffect(.degrees(-15))
+                .offset(x: 80, y: -60)
+                .ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                Spacer()
+
+                // Icon
+                ZStack {
+                    Circle()
+                        .fill(Color.green.opacity(0.12))
+                        .frame(width: 120, height: 120)
+
+                    Circle()
+                        .fill(Color.green.opacity(0.18))
+                        .frame(width: 90, height: 90)
+
+                    Image(systemName: page.systemImage)
+                        .font(.system(size: 44, weight: .semibold))
+                        .foregroundStyle(Color.green)
+                }
+                .scaleEffect(appeared ? 1 : 0.6)
+                .opacity(appeared ? 1 : 0)
+                .animation(.spring(response: 0.55, dampingFraction: 0.7).delay(0.1), value: appeared)
+
+                Spacer().frame(height: 40)
+
+                // Title
+                Text(page.title)
+                    .font(.system(size: 36, weight: .bold, design: .rounded))
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 32)
+                    .offset(y: appeared ? 0 : 24)
+                    .opacity(appeared ? 1 : 0)
+                    .animation(.spring(response: 0.55, dampingFraction: 0.8).delay(0.2), value: appeared)
+
+                Spacer().frame(height: 20)
+
+                // Subtitle
+                Text(page.subtitle)
+                    .font(.system(size: 17, weight: .regular, design: .rounded))
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 36)
+                    .offset(y: appeared ? 0 : 24)
+                    .opacity(appeared ? 1 : 0)
+                    .animation(.spring(response: 0.55, dampingFraction: 0.8).delay(0.28), value: appeared)
+
+                Spacer()
+
+                // Page dots
+                PageIndicator(currentPage: pageIndex, totalPages: pageCount + 1) // +1 for paywall
+                    .padding(.bottom, 32)
+                    .opacity(appeared ? 1 : 0)
+                    .animation(.easeIn(duration: 0.3).delay(0.35), value: appeared)
+
+                // CTA Button
+                Button(action: onNext) {
+                    Text("Continue")
+                        .font(.system(size: 17, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 17)
+                        .background(Color.green)
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                }
+                .padding(.horizontal, 24)
+                .offset(y: appeared ? 0 : 20)
+                .opacity(appeared ? 1 : 0)
+                .animation(.spring(response: 0.55, dampingFraction: 0.8).delay(0.38), value: appeared)
+
+                Spacer().frame(height: 52)
+            }
+        }
+        .onAppear { appeared = true }
+        .onDisappear { appeared = false }
+    }
+}
+
+// MARK: - Page Indicator
+
+struct PageIndicator: View {
+    let currentPage: Int
+    let totalPages: Int
+
+    var body: some View {
+        HStack(spacing: 7) {
+            ForEach(0..<totalPages, id: \.self) { index in
+                Capsule()
+                    .fill(index == currentPage ? Color.green : Color.green.opacity(0.25))
+                    .frame(width: index == currentPage ? 22 : 8, height: 8)
+                    .animation(.spring(response: 0.4, dampingFraction: 0.75), value: currentPage)
+            }
+        }
+    }
+}
+
+// MARK: - Onboarding Paywall (integrated, conversion-optimized)
+
+struct OnboardingPaywallView: View {
+    @Environment(SubscriptionController.self) var subscriptionController
+    @State private var selectedProduct: Product?
+    @State private var appeared = false
+    @State private var isPurchasing = false
+    let onComplete: () -> Void
+
+    private let features: [(symbol: String, title: String, detail: String)] = [
+        ("mic.fill",        "Voice Expense Entry",    "Log spending hands-free, anytime"),
+        ("creditcard.fill", "Apple Card Sync",        "Auto-import without sharing credentials"),
+        ("chart.bar.xaxis", "Visual Insights",        "Understand your habits at a glance"),
+        ("calendar",        "Bill Management",        "Never miss a recurring payment"),
+        ("lock.shield",     "100% Private & Offline", "No accounts, no ads, no tracking")
+    ]
+
+    var body: some View {
+        ZStack {
+            Color(.systemBackground).ignoresSafeArea()
+
+            // Background decoration
+            Image(systemName: "dollarsign.circle")
+                .font(.system(size: 300, weight: .ultraLight))
+                .foregroundStyle(Color.green.opacity(0.05))
+                .rotationEffect(.degrees(20))
+                .offset(x: 90, y: -140)
+                .ignoresSafeArea()
+
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 0) {
+
+                    // MARK: Hero
+                    VStack(spacing: 14) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.green.opacity(0.12))
+                                .frame(width: 100, height: 100)
+                            Circle()
+                                .fill(Color.green.opacity(0.18))
+                                .frame(width: 74, height: 74)
+                            Image(systemName: "sparkles")
+                                .font(.system(size: 36, weight: .semibold))
+                                .foregroundStyle(Color.green)
+                        }
+                        .scaleEffect(appeared ? 1 : 0.7)
+                        .opacity(appeared ? 1 : 0)
+                        .animation(.spring(response: 0.55, dampingFraction: 0.7).delay(0.05), value: appeared)
+
+                        Text("Unlock\nSimpler Budget")
+                            .font(.system(size: 34, weight: .bold, design: .rounded))
+                            .multilineTextAlignment(.center)
+                            .offset(y: appeared ? 0 : 16)
+                            .opacity(appeared ? 1 : 0)
+                            .animation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.15), value: appeared)
+
+                        Text("One purchase. Everything. Forever.")
+                            .font(.system(size: 16, weight: .medium, design: .rounded))
+                            .foregroundStyle(.secondary)
+                            .offset(y: appeared ? 0 : 12)
+                            .opacity(appeared ? 1 : 0)
+                            .animation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.2), value: appeared)
+                    }
+                    .padding(.top, 48)
+                    .padding(.bottom, 32)
+
+                    // MARK: Feature List
+                    VStack(spacing: 0) {
+                        ForEach(Array(features.enumerated()), id: \.offset) { index, feature in
+                            FeatureRow(symbol: feature.symbol, title: feature.title, detail: feature.detail)
+                                .offset(y: appeared ? 0 : 20)
+                                .opacity(appeared ? 1 : 0)
+                                .animation(
+                                    .spring(response: 0.5, dampingFraction: 0.8)
+                                        .delay(0.25 + Double(index) * 0.07),
+                                    value: appeared
+                                )
+
+                            if index < features.count - 1 {
+                                Divider()
+                                    .padding(.leading, 52)
+                                    .padding(.trailing, 16)
+                            }
+                        }
+                    }
+                    .background(Color(.secondarySystemBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .padding(.horizontal, 20)
+                    .opacity(appeared ? 1 : 0)
+                    .animation(.easeIn(duration: 0.3).delay(0.22), value: appeared)
+
+                    Spacer().frame(height: 28)
+
+                    // MARK: Product Cards
+                    if subscriptionController.products.isEmpty {
+                        ProgressView()
+                            .padding(.vertical, 24)
+                    } else {
+                        VStack(spacing: 12) {
+                            ForEach(
+                                subscriptionController.products.sorted { a, _ in a.id.contains("lifetime") },
+                                id: \.id
+                            ) { product in
+                                PaywallProductCard(
+                                    product: product,
+                                    isSelected: selectedProduct?.id == product.id,
+                                    onSelect: { selectedProduct = product }
+                                )
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                        .offset(y: appeared ? 0 : 16)
+                        .opacity(appeared ? 1 : 0)
+                        .animation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.55), value: appeared)
+                    }
+
+                    Spacer().frame(height: 20)
+
+                    // MARK: Free tier note
+                    HStack(spacing: 8) {
+                        Image(systemName: "info.circle")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Text("Try free with limited features. Upgrade anytime.")
+                            .font(.system(size: 13, design: .rounded))
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.horizontal, 28)
+                    .multilineTextAlignment(.center)
+                    .opacity(appeared ? 1 : 0)
+                    .animation(.easeIn(duration: 0.3).delay(0.6), value: appeared)
+
+                    Spacer().frame(height: 120) // space for pinned button
+                }
+            }
+
+            // MARK: Pinned Bottom CTA
+            VStack(spacing: 0) {
+                Spacer()
+
+                VStack(spacing: 12) {
+                    // Purchase button
+                    Button {
+                        guard let product = selectedProduct else { return }
+                        isPurchasing = true
+                        Task {
+                            await subscriptionController.purchase(product)
+                            isPurchasing = false
+                            if subscriptionController.isSubscribed {
+                                onComplete()
+                            }
+                        }
+                    } label: {
+                        Group {
+                            if isPurchasing {
+                                ProgressView()
+                                    .tint(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 17)
+                            } else {
+                                Text(ctaLabel)
+                                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                                    .foregroundStyle(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 17)
+                            }
+                        }
+                        .background(selectedProduct == nil ? Color.gray.opacity(0.5) : Color.green)
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    }
+                    .disabled(selectedProduct == nil || isPurchasing)
+                    .animation(.easeInOut(duration: 0.2), value: selectedProduct?.id)
+
+                    // Secondary actions
+                    HStack(spacing: 24) {
+                        Button("Continue Free") {
+                            onComplete()
+                        }
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundStyle(.secondary)
+
+                        Button("Restore") {
+                            Task {
+                                await subscriptionController.restorePurchases()
+                                if subscriptionController.isSubscribed { onComplete() }
+                            }
+                        }
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundStyle(.secondary)
+                    }
+
+                    // Legal links
+                    HStack(spacing: 16) {
+                        Link("Privacy Policy",
+                             destination: URL(string: "https://github.com/crwells86/Privacy-Policy")!)
+                        Link("Terms of Use",
+                             destination: URL(string: "https://github.com/crwells86/Terms-of-Use")!)
+                    }
+                    .font(.system(size: 11, design: .rounded))
+                    .foregroundStyle(Color(.tertiaryLabel))
+                }
+                .padding(.horizontal, 24)
+                .padding(.top, 16)
+                .padding(.bottom, 36)
+                .background(
+                    .regularMaterial,
+                    in: RoundedRectangle(cornerRadius: 0)
+                )
+            }
+            .ignoresSafeArea(edges: .bottom)
+        }
+        .onAppear {
+            appeared = true
+            selectedProduct = subscriptionController.products.first(where: {
+                $0.id.contains("lifetime")
+            }) ?? subscriptionController.products.first
+        }
+    }
+
+    private var ctaLabel: String {
+        guard let product = selectedProduct else { return "Select a Plan" }
+        if product.id.contains("lifetime") {
+            return "Get Lifetime Access — \(product.displayPrice)"
+        } else {
+            return "Subscribe — \(product.displayPrice)/yr"
+        }
+    }
+}
+
+// MARK: - Feature Row (Paywall)
+
+private struct FeatureRow: View {
+    let symbol: String
+    let title: String
+    let detail: String
+
+    var body: some View {
+        HStack(spacing: 14) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 9, style: .continuous)
+                    .fill(Color.green.opacity(0.15))
+                    .frame(width: 36, height: 36)
+                Image(systemName: symbol)
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundStyle(Color.green)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                Text(detail)
+                    .font(.system(size: 13, design: .rounded))
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            Image(systemName: "checkmark")
+                .font(.system(size: 13, weight: .bold))
+                .foregroundStyle(Color.green)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 13)
+    }
+}
+
+// MARK: - Product Card (Paywall)
+
+private struct PaywallProductCard: View {
+    let product: Product
+    let isSelected: Bool
+    let onSelect: () -> Void
+
+    private var isLifetime: Bool { product.id.contains("lifetime") }
+
+    var body: some View {
+        Button(action: onSelect) {
+            ZStack(alignment: .topTrailing) {
+                HStack(spacing: 14) {
+                    // Radio
+                    ZStack {
+                        Circle()
+                            .strokeBorder(isSelected ? Color.green : Color(.systemGray3), lineWidth: 2)
+                            .frame(width: 24, height: 24)
+                        if isSelected {
+                            Circle()
+                                .fill(Color.green)
+                                .frame(width: 14, height: 14)
+                        }
+                    }
+                    .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
+
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(product.displayName)
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        Text(isLifetime ? "Pay once — own it forever" : "Billed annually")
+                            .font(.system(size: 13, design: .rounded))
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Spacer()
+
+                    Text(product.displayPrice)
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .foregroundStyle(isSelected ? Color.green : .primary)
+                }
+                .padding(.horizontal, 18)
+                .padding(.vertical, 18)
+                .background(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(isSelected ? Color.green.opacity(0.1) : Color(.secondarySystemBackground))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .strokeBorder(isSelected ? Color.green : Color.clear, lineWidth: 2)
+                )
+
+                // Badge
+                if isLifetime {
+                    Text("BEST VALUE")
+                        .font(.system(size: 10, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 9)
+                        .padding(.vertical, 5)
+                        .background(Color.green)
+                        .clipShape(Capsule())
+                        .offset(x: -12, y: -12)
+                }
+            }
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - App Entry Point Helper
+// Wrap your existing ContentView with this to gate on onboarding
+
+struct OnboardingGate<Content: View>: View {
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        if hasSeenOnboarding {
+            content()
+        } else {
+            OnboardingFlow()
+        }
+    }
+}
+
+
+#Preview {
+    OnboardingFlow()
+        .environment(SubscriptionController())
+}

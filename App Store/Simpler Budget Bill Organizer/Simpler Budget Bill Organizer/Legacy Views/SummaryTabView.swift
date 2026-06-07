@@ -245,6 +245,106 @@ struct SummaryTabView: View {
     }
 }
 
+
+
+
+
+// MARK: - App Store Screenshot Preview Data
+
+func insertScreenshotDummyData(into context: ModelContext) {
+    let calendar = Calendar.current
+    let now = Date()
+
+    // Helper: date N days ago
+    func daysAgo(_ n: Int) -> Date {
+        calendar.date(byAdding: .day, value: -n, to: now)!
+    }
+
+    // MARK: Categories
+    let groceries  = Category(name: "Groceries",   icon: "cart",      limit: 600)
+    let dining     = Category(name: "Dining Out",  icon: "fork.knife", limit: 300)
+    let transport  = Category(name: "Transport",   icon: "car",       limit: 200)
+    let health     = Category(name: "Health",      icon: "cross.case", limit: 150)
+    let shopping   = Category(name: "Shopping",    icon: "bag",       limit: 400)
+    let utilities  = Category(name: "Utilities",   icon: "bolt",      limit: 250)
+
+    [groceries, dining, transport, health, shopping, utilities]
+        .forEach { context.insert($0) }
+
+    // MARK: Income — spread across the last 30 days
+    let incomeEntries: [(String, Decimal, Int)] = [
+        ("Salary",       4_200.00,  1),
+        ("Freelance",      850.00, 12),
+        ("Side Project",   320.00, 20),
+        ("Dividends",      145.50, 25),
+    ]
+    for (source, amount, daysBack) in incomeEntries {
+        let income = Income(
+            source: source,
+            amount: amount,
+            date: daysAgo(daysBack),
+            frequency: .monthly
+        )
+        context.insert(income)
+    }
+
+    // MARK: Expenses — realistic-looking spread
+    let expenseEntries: [(Decimal, String, Int, Category)] = [
+        (127.40, "Whole Foods",        2,  groceries),
+        ( 68.50, "Trader Joe's",       8,  groceries),
+        ( 89.20, "Costco",            15,  groceries),
+        ( 47.00, "Nobu Restaurant",    3,  dining),
+        ( 32.80, "Chipotle",           7,  dining),
+        ( 21.50, "Blue Bottle Coffee", 11, dining),
+        ( 55.00, "Uber",               5,  transport),
+        ( 43.20, "Gas Station",        9,  transport),
+        ( 12.00, "Clipper Card",      18,  transport),
+        ( 95.00, "Gym Membership",     1,  health),
+        ( 48.60, "Pharmacy",          14,  health),
+        (138.00, "Nike",               6,  shopping),
+        ( 79.99, "Amazon",            10,  shopping),
+        ( 64.50, "IKEA",              22,  shopping),
+        ( 89.00, "PG&E",               2,  utilities),
+        ( 75.00, "Comcast",           15,  utilities),
+    ]
+    for (amount, vendor, daysBack, category) in expenseEntries {
+        let expense = Expense(
+            amount: amount,
+            vendor: vendor,
+            date: daysAgo(daysBack),
+            category: category
+        )
+        context.insert(expense)
+    }
+
+    // MARK: Recurring Bills (Transactions)
+    let billEntries: [(String, Double, BillFrequency, Int, Bool)] = [
+        ("Rent",           2_100.00, .monthly,   15, true),
+        ("Netflix",           18.99, .monthly,    5, false),
+        ("Spotify",           11.99, .monthly,    8, false),
+        ("iCloud",             2.99, .monthly,    3, false),
+        ("Car Insurance",    142.00, .monthly,   20, true),
+        ("Gym",               45.00, .monthly,    1, true),
+        ("Student Loan",     310.00, .monthly,   25, false),
+        ("Electric Bill",     89.00, .monthly,    2, true),
+    ]
+    for (name, amount, freq, daysUntilDue, remindMe) in billEntries {
+        let dueDate = calendar.date(byAdding: .day, value: daysUntilDue, to: now)!
+        let bill = Transaction(
+            name: name,
+            amount: amount,
+            frequency: freq,
+            dueDate: dueDate,
+            remindMe: remindMe
+        )
+        context.insert(bill)
+    }
+
+    try? context.save()
+}
+
+
+
 // MARK: - Hero Balance Card
 struct HeroBalanceCard: View {
     let income: Decimal

@@ -77,6 +77,7 @@ struct ContentView: View {
                     }
                 }
             }
+            .lifetimeOfferSheet()
             .onAppear {
                 preloadDefaultCategoriesIfNeeded()
                 
@@ -92,6 +93,7 @@ struct ContentView: View {
                 
                 
                 //                checkForFeedbackPrompt()
+                // insertScreenshotDummyData(into: context)
             }
             .onAppear {
 #if canImport(FoundationModels)
@@ -118,7 +120,8 @@ struct ContentView: View {
             //                FeedbackSheetView()
             //            }
         } else {
-            OnboardingView(hasSeenOnboarding: $hasSeenOnboarding)
+//            OnboardingView(hasSeenOnboarding: $hasSeenOnboarding)
+            OnboardingFlow()
         }
     }
     
